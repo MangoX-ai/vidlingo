@@ -6,10 +6,12 @@ scripts/.venv/
 scripts/__pycache__/
 *.pyc
 
+# Deployment (chỉ dùng nội bộ)
+deployment/
+
 # Node
-deployment/node_modules/
-deployment/.env
 .env
+manifest.json
 
 # macOS
 .DS_Store
