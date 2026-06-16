@@ -1,0 +1,3208 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MangoX Leanring Language</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%23c41230'/><stop offset='1' stop-color='%23e8364f'/></linearGradient></defs><rect width='32' height='32' rx='8' fill='url(%23g)'/><polygon points='12,8 26,16 12,24' fill='white'/></svg>"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #faf8f5;
+        --surface: #ffffff;
+        --border: #e8e2d9;
+        --border-focus: #c41230;
+        --purple: #c41230;
+        --purple-dark: #a50e27;
+        --purple-light: #fdf0f2;
+        --purple-mid: #f9d0d6;
+        --green: #16a34a;
+        --green-light: #dcfce7;
+        --text: #1a1714;
+        --text-muted: #6b6560;
+        --text-subtle: #a8a29e;
+        --shadow-sm:
+          0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+        --shadow-md:
+          0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+        --shadow-hover:
+          0 8px 24px rgba(196, 18, 48, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06);
+        --radius: 12px;
+        --radius-sm: 8px;
+        --radius-xs: 6px;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family:
+          'Space Grotesk',
+          -apple-system,
+          sans-serif;
+        font-size: 14px;
+        height: 99dvh; /* trừ thanh URL của trình duyệt mobile (iOS Safari) */
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .main-content {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+      }
+
+      /* ── Header ─────────────────────────────────────────── */
+      header {
+        height: 58px;
+        padding: 0 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .logo-home {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none;
+        color: inherit;
+        transition: opacity 0.15s;
+      }
+      .logo-home:hover {
+        opacity: 0.7;
+      }
+      .logo-mark {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, #c41230, #e8364f);
+        border-radius: var(--radius-xs);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .logo-mark svg {
+        width: 16px;
+        height: 16px;
+        color: #fff;
+      }
+      .logo-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -0.3px;
+      }
+      .logo-sep {
+        color: var(--border);
+        font-size: 18px;
+        font-weight: 300;
+        margin: 0 2px;
+      }
+      .logo-folder {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--purple);
+        background: var(--purple-light);
+        padding: 2px 10px;
+        border-radius: 20px;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        display: none;
+      }
+
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .count-badge {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--purple);
+        background: var(--purple-light);
+        padding: 3px 10px;
+        border-radius: 20px;
+        display: none;
+      }
+
+      .btn-ghost {
+        height: 36px;
+        padding: 0 14px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        color: var(--text-muted);
+        font-size: 13px;
+        font-weight: 500;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.15s;
+        text-decoration: none;
+        display: none;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+      }
+      .btn-ghost:hover {
+        background: var(--bg);
+        color: var(--text);
+        border-color: #c4b5fd;
+      }
+      .btn-ghost.visible {
+        display: flex;
+      }
+
+      .btn-primary {
+        height: 36px;
+        padding: 0 16px;
+        border: none;
+        border-radius: var(--radius-sm);
+        background: var(--purple);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        white-space: nowrap;
+        box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+      }
+      .btn-primary:hover {
+        background: var(--purple-dark);
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+        transform: translateY(-1px);
+      }
+      .btn-primary:active {
+        transform: translateY(0);
+      }
+      .btn-primary:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* ── Toolbar ─────────────────────────────────────────── */
+      .toolbar {
+        padding: 20px 32px 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .search-wrap {
+        flex: 1;
+        max-width: 340px;
+        position: relative;
+      }
+      .search-wrap svg {
+        position: absolute;
+        left: 11px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 15px;
+        height: 15px;
+        color: var(--text-subtle);
+        pointer-events: none;
+      }
+      .search {
+        width: 100%;
+        height: 38px;
+        padding: 0 12px 0 34px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-family: inherit;
+        color: var(--text);
+        outline: none;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+      }
+      .search::placeholder {
+        color: var(--text-subtle);
+      }
+      .search:focus {
+        border-color: var(--border-focus);
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+      }
+
+      .sort-select {
+        height: 38px;
+        padding: 0 30px 0 12px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-family: inherit;
+        color: var(--text-muted);
+        outline: none;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a1a1aa' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        transition: border-color 0.15s;
+      }
+      .sort-select:focus {
+        border-color: var(--border-focus);
+        outline: none;
+      }
+
+      /* ── Banner ─────────────────────────────────────────── */
+      .banner {
+        margin: 0 32px 8px;
+        padding: 11px 14px;
+        border-radius: var(--radius-sm);
+        font-size: 13px;
+        font-weight: 500;
+        display: none;
+        align-items: center;
+        gap: 8px;
+      }
+      .banner.info {
+        background: #eef2ff;
+        border: 1px solid #c7d2fe;
+        color: #4338ca;
+        display: flex;
+      }
+      .banner.warn {
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        color: #92400e;
+        display: flex;
+      }
+      .banner.error {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #dc2626;
+        display: flex;
+      }
+      .banner svg {
+        width: 15px;
+        height: 15px;
+        flex-shrink: 0;
+      }
+
+      /* ── Grid ─────────────────────────────────────────── */
+      #grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 16px;
+        padding: 4px 32px 32px;
+      }
+
+      /* ── Date group header ──────────────────────────────── */
+      .date-group {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 19px;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -0.2px;
+        margin: 18px 0 4px;
+      }
+      .date-group:first-child {
+        margin-top: 0;
+      }
+      .date-group svg {
+        width: 19px;
+        height: 19px;
+        color: var(--purple);
+        flex-shrink: 0;
+      }
+      .date-group .date-count {
+        font-weight: 700;
+        color: var(--purple);
+        font-size: 16px;
+        background: var(--purple-light);
+        padding: 2px 12px;
+        border-radius: 20px;
+      }
+      .date-group::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+
+      /* category header (sub-level under a date, or top-level in cat mode) */
+      .cat-group {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 11px;
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -0.2px;
+        margin: 14px 0 6px;
+      }
+      .cat-group.top {
+        font-size: 23px;
+        margin: 22px 0 8px;
+      }
+      .cat-group .cat-dot {
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .cat-group .cat-count {
+        font-weight: 700;
+        color: var(--text);
+        font-size: 13px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        padding: 2px 12px;
+        border-radius: 20px;
+      }
+      .cat-group::before,
+      .cat-group::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+        opacity: 0.7;
+      }
+
+      /* ── Card ─────────────────────────────────────────── */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        cursor: pointer;
+        transition:
+          transform 0.18s,
+          box-shadow 0.18s,
+          border-color 0.18s;
+        box-shadow: var(--shadow-sm);
+      }
+      .card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-hover);
+        border-color: #c4b5fd;
+      }
+
+      .thumb-wrap {
+        aspect-ratio: 9/16;
+        background: var(--bg);
+        position: relative;
+        overflow: hidden;
+        contain: layout paint;
+        clip-path: inset(0);
+      }
+      .thumb-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.3s;
+      }
+      .card:hover .thumb-wrap img {
+        transform: scale(1.04);
+      }
+
+      .thumb-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 8px;
+        background: linear-gradient(160deg, #f5f3ff 0%, #ede9fe 100%);
+      }
+      .thumb-placeholder svg {
+        width: 28px;
+        height: 28px;
+        color: #c4b5fd;
+      }
+      .thumb-placeholder span {
+        font-size: 11px;
+        color: var(--text-subtle);
+        font-weight: 500;
+      }
+
+      .badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        padding: 3px 8px;
+        border-radius: 20px;
+      }
+      .badge-mp4 {
+        background: var(--green-light);
+        color: var(--green);
+      }
+      .badge-html {
+        background: var(--purple-light);
+        color: var(--purple);
+      }
+
+      .card-body {
+        padding: 12px 13px 12px;
+      }
+
+      .card-title {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--text);
+        line-height: 1.4;
+        letter-spacing: -0.1px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 4px;
+      }
+
+      .card-topic {
+        font-size: 11px;
+        color: var(--text-subtle);
+        line-height: 1.4;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-bottom: 10px;
+      }
+
+      /* Badge style thiết kế — luôn hiển thị (design-style hoặc "AI Generate"). */
+      .card-style {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        max-width: 100%;
+        font-size: 10.5px;
+        font-weight: 600;
+        color: var(--purple);
+        background: var(--purple-light);
+        border: 1px solid var(--purple-mid);
+        padding: 1px 8px 1px 6px;
+        border-radius: 20px;
+        margin-bottom: 8px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .card-style svg {
+        width: 11px;
+        height: 11px;
+        flex-shrink: 0;
+      }
+      /* "AI Generate" — tông trung tính để phân biệt với style brand thật. */
+      .card-style.is-ai {
+        color: var(--text-muted);
+        background: var(--bg);
+        border-color: var(--border);
+      }
+
+      /* footer: date left, action buttons right */
+      .card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        border-top: 1px solid var(--border);
+        padding-top: 9px;
+        margin-top: 2px;
+      }
+      .card-date-info {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        min-width: 0;
+      }
+      .card-date-row {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 10.5px;
+        color: var(--text-subtle);
+        white-space: nowrap;
+      }
+      .card-date-row svg {
+        width: 10px;
+        height: 10px;
+        flex-shrink: 0;
+        color: #c4b5fd;
+      }
+      .card-date-val {
+        color: var(--text-muted);
+        font-weight: 500;
+      }
+
+      .card-actions {
+        display: flex;
+        gap: 5px;
+        flex-shrink: 0;
+      }
+      .btn-sm {
+        height: 28px;
+        padding: 0 10px;
+        border-radius: var(--radius-xs);
+        font-size: 11px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.15s;
+        text-align: center;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        border: 1px solid transparent;
+        white-space: nowrap;
+      }
+      .btn-view {
+        background: var(--bg);
+        color: var(--text-muted);
+        border-color: var(--border);
+      }
+      .btn-view:hover {
+        background: var(--purple-light);
+        color: var(--purple);
+        border-color: #c4b5fd;
+      }
+      .btn-mp4 {
+        background: var(--purple);
+        color: #fff;
+        border-color: var(--purple);
+      }
+      .btn-mp4:hover {
+        background: var(--purple-dark);
+        border-color: var(--purple-dark);
+      }
+      .btn-dictation {
+        background: var(--purple);
+        color: #fff;
+        border-color: var(--purple);
+      }
+      .btn-dictation:hover {
+        background: var(--purple-dark);
+        border-color: var(--purple-dark);
+        color: #fff;
+      }
+
+      /* ── Empty ─────────────────────────────────────────── */
+      .empty {
+        grid-column: 1/-1;
+        text-align: center;
+        padding: 80px 20px;
+        background: var(--surface);
+        border: 2px dashed var(--border);
+        border-radius: var(--radius);
+      }
+      .empty-icon {
+        width: 56px;
+        height: 56px;
+        background: var(--purple-light);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 14px;
+      }
+      .empty-icon svg {
+        width: 24px;
+        height: 24px;
+        color: var(--purple);
+      }
+      .empty p {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 6px;
+      }
+      .empty small {
+        font-size: 13px;
+        color: var(--text-muted);
+      }
+
+      /* ── Modal ─────────────────────────────────────────── */
+      .modal-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(10, 8, 20, 0.7);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        z-index: 100;
+        align-items: center;
+        justify-content: center;
+        padding: 6px;
+      }
+      .modal-backdrop.open {
+        display: flex;
+      }
+
+      .modal {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        width: min(98vw, 720px);
+        height: min(99vh, 1400px);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        box-shadow:
+          0 24px 60px rgba(0, 0, 0, 0.2),
+          0 4px 16px rgba(124, 58, 237, 0.08);
+        animation: modal-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      @keyframes modal-in {
+        from {
+          opacity: 0;
+          transform: scale(0.95) translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      .modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px 18px;
+        flex-shrink: 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .modal-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text);
+        line-height: 1.4;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .modal-close {
+        width: 28px;
+        height: 28px;
+        border-radius: var(--radius-xs);
+        background: var(--bg);
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+        flex-shrink: 0;
+      }
+      .modal-close:hover {
+        background: var(--purple-light);
+        color: var(--purple);
+        border-color: #c4b5fd;
+      }
+
+      .modal-content {
+        position: relative;
+        flex: 1;
+        min-height: 0;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #e3e3e3;
+      }
+
+      /* ── Modal slide nav arrows ─────────────────────────── */
+      .modal-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        color: #fff;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 5;
+        transition:
+          background 0.15s,
+          transform 0.15s;
+        -webkit-backdrop-filter: blur(4px);
+        backdrop-filter: blur(4px);
+      }
+      .modal-nav:hover {
+        background: rgba(0, 0, 0, 0.7);
+      }
+      .modal-nav:active {
+        transform: translateY(-50%) scale(0.9);
+      }
+      .modal-nav-prev {
+        left: 14px;
+      }
+      .modal-nav-next {
+        right: 14px;
+      }
+      .modal-content iframe {
+        height: 100%;
+        width: auto;
+        aspect-ratio: 9/16;
+        max-width: 100%;
+        border: none;
+        display: block;
+        margin-top: -2px;
+      }
+
+      .modal-note {
+        flex-shrink: 0;
+        padding: 12px 16px;
+        border-top: 1px solid var(--border);
+        background: var(--bg);
+        font-size: 12px;
+        line-height: 1.5;
+        color: var(--text-muted);
+      }
+      .modal-note ul {
+        margin: 0;
+        padding-left: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .modal-note li::marker {
+        color: var(--purple);
+      }
+      .modal-faq-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        height: 32px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--purple);
+        text-decoration: none;
+        padding: 0 12px;
+        border: 1px solid var(--purple-mid);
+        border-radius: var(--radius-sm);
+        background: var(--purple-light);
+        transition: all 0.15s;
+      }
+      .modal-faq-link:hover {
+        background: var(--purple);
+        color: #fff;
+        border-color: var(--purple);
+      }
+
+      .modal-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px 16px;
+        flex-shrink: 0;
+        border-top: 1px solid var(--border);
+      }
+      .btn-md {
+        flex: 0 0 auto;
+        height: 32px;
+        padding: 0 14px;
+        border-radius: var(--radius-sm);
+        font-size: 12px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.15s;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        border: 1px solid transparent;
+      }
+      .btn-open-new {
+        background: var(--bg);
+        color: var(--text-muted);
+        border-color: var(--border);
+      }
+      .btn-open-new:hover {
+        background: var(--purple-light);
+        color: var(--purple);
+        border-color: #c4b5fd;
+      }
+      .btn-toggle-view {
+        background: var(--purple);
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(196, 18, 48, 0.25);
+      }
+      .btn-toggle-view:hover {
+        background: var(--purple-dark);
+        transform: translateY(-1px);
+      }
+      .btn-toggle-view.active {
+        background: var(--bg);
+        color: var(--text-muted);
+        border-color: var(--border);
+        box-shadow: none;
+      }
+      .btn-toggle-view.active:hover {
+        background: var(--purple-light);
+        color: var(--purple);
+        border-color: #c4b5fd;
+      }
+      .btn-dl-mp4 {
+        background: var(--bg);
+        color: var(--text-muted);
+        border-color: var(--border);
+      }
+      .btn-dl-mp4:hover {
+        background: var(--purple-light);
+        color: var(--purple);
+        border-color: #c4b5fd;
+        transform: translateY(-1px);
+      }
+
+      /* ── iFrame thumbnail ─────────────────────────────── */
+      .thumb-iframe-wrap {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        clip-path: inset(0);
+        background: linear-gradient(160deg, #fdf0f2 0%, #f9d0d6 100%);
+      }
+      .thumb-iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 1080px;
+        height: 1920px;
+        transform-origin: top left;
+        pointer-events: none;
+        border: none;
+        display: block;
+      }
+      .thumb-hint {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: var(--purple);
+        font-size: 11px;
+        font-weight: 600;
+        pointer-events: none;
+        transition: opacity 0.15s;
+      }
+      .thumb-hint svg {
+        width: 26px;
+        height: 26px;
+        opacity: 0.7;
+      }
+      .thumb-iframe-wrap.playing .thumb-hint {
+        opacity: 0;
+      }
+
+      /* ── Pagination ─────────────────────────────────────── */
+      .page-bar {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 8px 32px;
+      }
+      .page-bar #perPageSelect {
+        margin-left: auto;
+        flex-shrink: 0;
+      }
+      #pagination {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: end;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--text-muted);
+      }
+      #pagination.hidden {
+        display: none;
+      }
+      .page-btns {
+        display: flex;
+        gap: 4px;
+      }
+      .page-btn {
+        height: 32px;
+        min-width: 32px;
+        padding: 0 10px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-xs);
+        font-size: 12px;
+        font-weight: 600;
+        font-family: inherit;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .page-btn:hover:not(:disabled):not(.active) {
+        background: var(--purple-light);
+        color: var(--purple);
+        border-color: #c4b5fd;
+      }
+      .page-btn.active {
+        background: var(--purple);
+        color: #fff;
+        border-color: var(--purple);
+        box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+      }
+      .page-btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+
+      /* ── Tablet ── */
+      @media (max-width: 900px) {
+        #grid {
+          grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
+      }
+
+      /* ── Mobile ── */
+      @media (max-width: 600px) {
+        header {
+          padding: 0 16px;
+          height: 52px;
+        }
+        .logo-name {
+          font-size: 14px;
+        }
+        .logo-sep,
+        .logo-folder {
+          display: none;
+        }
+        .count-badge {
+          display: none !important;
+        }
+
+        .toolbar {
+          padding: 12px 16px 8px;
+          gap: 8px;
+        }
+        .search-wrap {
+          max-width: 100%;
+        }
+        .sort-select {
+          flex-shrink: 0;
+        }
+
+        #grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 10px;
+          padding: 4px 16px 16px;
+        }
+
+        .banner {
+          margin: 0 16px 8px;
+        }
+
+        .page-bar {
+          gap: 8px;
+          padding: 6px 16px max(6px, env(safe-area-inset-bottom));
+        }
+        .page-bar #perPageSelect {
+          margin-left: 0;
+        }
+        #pagination {
+          align-items: center;
+          gap: 8px;
+          height: auto;
+        }
+
+        .modal {
+          width: 100%;
+          max-height: 100dvh;
+          border-radius: 16px 16px 0 0;
+          align-self: flex-end;
+        }
+        .modal-backdrop {
+          padding: 0;
+          align-items: flex-end;
+        }
+      }
+
+      /* ── Small mobile (1 column) ── */
+      @media (max-width: 380px) {
+        #grid { grid-template-columns: 1fr; }
+      }
+
+      /* ══════════════════════════════════════════════════════
+         Dictation Modal
+         ══════════════════════════════════════════════════════ */
+      .dm-backdrop {
+        display: none; position: fixed; inset: 0; z-index: 200;
+        background: #ffffff;
+        flex-direction: column;
+        font-family: 'Space Grotesk', -apple-system, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .dm-backdrop.open { display: flex; }
+
+      .dm-topbar {
+        height: 48px; flex-shrink: 0;
+        display: flex; align-items: center; gap: 9px;
+        padding: 0 18px;
+        background: #ffffff;
+        border-bottom: 1px solid #f0d8dc;
+        overflow: hidden;
+      }
+      .dm-idx {
+        font-size: 12px; font-weight: 700; color: #c41230;
+        background: rgba(196,18,48,.1); padding: 2px 9px; border-radius: 20px; flex-shrink: 0;
+      }
+      .dm-prog {
+        display: flex; align-items: center; gap: 7px;
+        font-size: 13px; font-weight: 600; color: #9a6070; flex-shrink: 0;
+      }
+      .dm-match { transition: color .2s; }
+      .dm-match.good { color: #16a34a; }
+      .dm-sep { width: 1px; height: 18px; background: #f0d8dc; flex-shrink: 0; }
+      .dm-shortcuts {
+        display: flex; align-items: center; gap: 5px;
+        font-size: 11px; color: #c0a0a8; white-space: nowrap;
+      }
+      .dm-shortcuts kbd {
+        display: inline-flex; align-items: center; justify-content: center;
+        height: 18px; padding: 0 5px;
+        background: #fff0f2; border: 1px solid #f0d8dc; border-radius: 4px;
+        font-size: 10px; font-family: inherit; color: #9a6070;
+      }
+      .dm-right { display: flex; align-items: center; gap: 5px; margin-left: auto; }
+      .dm-btn {
+        height: 28px; padding: 0 9px;
+        background: transparent; border: 1px solid #f0d8dc;
+        border-radius: 6px; font-size: 11px; font-weight: 600;
+        font-family: inherit; color: #9a6070; cursor: pointer;
+        display: flex; align-items: center; gap: 4px;
+        white-space: nowrap; transition: all .15s;
+      }
+      .dm-btn:hover { background: rgba(196,18,48,.08); color: #c41230; border-color: #c41230; }
+      .dm-btn.on { background: rgba(196,18,48,.1); color: #c41230; border-color: #c41230; }
+      .dm-btn-sz { padding: 0 7px; min-width: 28px; font-weight: 700; }
+
+      .dm-pbar { height: 3px; background: #f0d8dc; flex-shrink: 0; }
+      .dm-pbar-fill { height: 100%; background: #c41230; transition: width .35s; }
+
+      /* ── Video area (top, full-width) ── */
+      .dm-video-area {
+        width: 100%; height: 42vh; flex-shrink: 0;
+        background: #000; overflow: hidden;
+      }
+      #dmPlayer { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+      /* ── Custom media controls bar ── */
+      .dm-controls {
+        display: flex; align-items: center; gap: 8px;
+        padding: 8px 14px; background: #1a1a1a; flex-shrink: 0;
+      }
+      .dm-ctrl-btn {
+        width: 30px; height: 30px; flex-shrink: 0;
+        background: transparent; border: none;
+        color: #bbb; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 50%; transition: all .15s;
+      }
+      .dm-ctrl-btn:hover { background: rgba(255,255,255,.12); color: #fff; }
+      .dm-ctrl-btn.dm-pp { background: #fff; color: #111; }
+      .dm-ctrl-btn.dm-pp:hover { background: #eee; }
+      .dm-seekbar-wrap {
+        flex: 1; height: 20px;
+        cursor: pointer; position: relative; margin: 0 4px;
+        display: flex; align-items: center;
+      }
+      .dm-seekbar-wrap::before {
+        content: ''; position: absolute; inset: 8px 0;
+        background: #3a3a3a; border-radius: 2px; pointer-events: none;
+      }
+      .dm-seekbar-fill {
+        height: 4px; background: #c41230; border-radius: 2px;
+        width: 0%; pointer-events: none; position: relative; z-index: 1;
+        transition: none;
+      }
+      .dm-time {
+        font-size: 11px; color: #777; white-space: nowrap;
+        font-family: monospace; flex-shrink: 0;
+      }
+      .dm-vol-wrap { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
+      .dm-vol-wrap svg { color: #888; flex-shrink: 0; }
+      .dm-vol-slider {
+        -webkit-appearance: none; appearance: none;
+        width: 70px; height: 3px; border-radius: 2px;
+        background: #3a3a3a; outline: none; cursor: pointer;
+      }
+      .dm-vol-slider::-webkit-slider-thumb {
+        -webkit-appearance: none; width: 12px; height: 12px;
+        border-radius: 50%; background: #c41230; cursor: pointer;
+      }
+      .dm-speed-btns { display: flex; gap: 2px; flex-shrink: 0; }
+      .dm-speed-btn {
+        height: 24px; padding: 0 7px;
+        background: transparent; border: 1px solid #3a3a3a;
+        border-radius: 4px; font-size: 10.5px; color: #666;
+        cursor: pointer; font-family: inherit; transition: all .12s;
+      }
+      .dm-speed-btn:hover { border-color: #777; color: #bbb; }
+      .dm-speed-btn.active { background: #c41230; border-color: #c41230; color: #fff; }
+
+      .dm-content {
+        flex: 1; min-height: 0;
+        display: flex; flex-direction: row;
+        overflow: hidden;
+      }
+      .dm-main {
+        flex: 1; min-height: 0; min-width: 0;
+        display: flex; flex-direction: column;
+        padding: 14px 20px 10px; gap: 11px; overflow-y: auto;
+        color: #1a0508;
+      }
+      .dm-tpanel {
+        width: 250px; min-width: 180px;
+        overflow-y: auto; flex-shrink: 0;
+        border-left: 1px solid #f0e0e4;
+        background: #fdf8f9;
+        padding: 6px 0;
+      }
+      /* Transcript panel header (drag handle + close — only visible on mobile) */
+      .dm-tp-header {
+        display: none;
+        align-items: center; justify-content: space-between;
+        padding: 10px 14px 6px;
+        border-bottom: 1px solid #f0e0e4;
+        flex-shrink: 0;
+      }
+      .dm-tp-title { font-size: 13px; font-weight: 700; color: #c41230; }
+      .dm-tp-close {
+        width: 28px; height: 28px; border-radius: 50%;
+        background: #fff0f2; border: 1px solid #f0d8dc;
+        color: #9a6070; font-size: 13px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        touch-action: manipulation;
+      }
+      /* Backdrop behind transcript overlay on mobile */
+      .dm-tp-backdrop {
+        display: none; position: fixed; inset: 0; z-index: 499;
+        background: rgba(0,0,0,.35);
+      }
+
+      /* touch-action: manipulation removes 300ms tap delay on all interactive elements */
+      .dm-btn, .dm-hint-btn, .dm-nav-btn, .dm-ctrl-btn,
+      .dm-chip, .dm-showall, .dm-speed-btn, .dm-tp-item { touch-action: manipulation; }
+
+      .dm-tp-item {
+        padding: 7px 12px;
+        cursor: pointer;
+        border-left: 3px solid transparent;
+        transition: background .12s, border-color .12s;
+      }
+      .dm-tp-item:hover { background: #fff0f3; }
+      .dm-tp-item.active {
+        background: #fff0f3;
+        border-left-color: #c41230;
+      }
+      .dm-tp-num {
+        font-size: 10px; color: #c41230; margin-bottom: 2px;
+        font-weight: 600; letter-spacing: .3px;
+      }
+      .dm-tp-text {
+        font-size: 11.5px; color: #4a2030; line-height: 1.5;
+        filter: blur(4px); transition: filter .2s; user-select: none;
+      }
+      .dm-tp-item.done .dm-tp-text { filter: none; user-select: text; }
+      .dm-tp-item.active .dm-tp-text { color: #1a0508; font-weight: 500; }
+      .dm-tp-item.done .dm-tp-text { color: #6a3040; }
+      .dm-input {
+        width: 100%; padding: 15px 17px;
+        background: #ffffff; border: 2px solid #f0d8dc;
+        border-radius: 10px; font-size: 18px; font-family: inherit;
+        color: #1a0508; outline: none; caret-color: #c41230;
+        transition: border-color .2s, box-shadow .2s;
+      }
+      .dm-input::placeholder { color: #c0a0a8; }
+      .dm-input:focus {
+        border-color: #c41230;
+        box-shadow: 0 0 0 4px rgba(196,18,48,.12);
+      }
+      .dm-trans {
+        margin-top: 7px; padding: 0 2px;
+        font-size: 13px; color: #9a6070; font-style: italic; line-height: 1.5;
+        transition: opacity .2s;
+      }
+      .dm-trans.hide { opacity: 0; pointer-events: none; }
+
+      .dm-tags { display: flex; flex-wrap: wrap; gap: 6px; min-height: 22px; }
+      .dm-tag {
+        display: inline-flex; align-items: center; gap: 4px;
+        height: 22px; padding: 0 9px; border-radius: 20px;
+        font-size: 11px; font-weight: 600;
+      }
+      .dm-tag-proper { background: rgba(196,18,48,.1); color: #c41230; border: 1px solid rgba(196,18,48,.25); }
+      .dm-tag-name   { background: rgba(59,130,246,.1); color: #2563eb; border: 1px solid rgba(59,130,246,.25); }
+
+      .dm-word-section {
+        flex: 1; min-height: 100px;
+        background: #fff8f9; border: 1px solid #f0d8dc;
+        border-radius: 10px; padding: 13px 15px;
+        display: flex; flex-direction: column; gap: 10px;
+      }
+      .dm-ws-hdr { display: flex; align-items: center; justify-content: space-between; }
+      .dm-ws-lbl {
+        display: flex; align-items: center; gap: 5px;
+        font-size: 12px; font-weight: 500; color: #c0a0a8;
+      }
+      .dm-ws-lbl svg { width: 13px; height: 13px; color: #c41230; }
+      .dm-ws-right { display: flex; align-items: center; gap: 8px; }
+      .dm-hidden-count { font-size: 11px; color: #c0a0a8; }
+      .dm-showall {
+        font-size: 11px; font-weight: 600; color: #9a6070;
+        background: transparent; border: 1px solid #f0d8dc;
+        border-radius: 6px; padding: 3px 10px;
+        cursor: pointer; font-family: inherit; transition: all .15s;
+      }
+      .dm-showall:hover { background: rgba(196,18,48,.08); color: #c41230; border-color: #c41230; }
+
+      .dm-grid { display: flex; flex-wrap: wrap; gap: 7px; align-content: flex-start; }
+      .dm-chip {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-width: 36px; height: 34px; padding: 0 11px;
+        background: #fff0f2; border: 1px solid #f0d8dc;
+        border-radius: 6px; font-size: 13px; font-weight: 600;
+        color: #d0a8b0; cursor: pointer; letter-spacing: 2.5px;
+        font-family: monospace; transition: all .15s; user-select: none;
+      }
+      .dm-chip:hover:not(.dm-revealed):not(.dm-correct) {
+        background: rgba(196,18,48,.1); border-color: #c41230; color: #c41230;
+      }
+      .dm-chip.dm-hint-first { color: #9a6070; letter-spacing: 1.5px; }
+      .dm-chip.dm-hint-last  { color: #9a6070; letter-spacing: 1.5px; }
+      .dm-chip.dm-hint-both  { color: #9a6070; letter-spacing: 1.5px; }
+      .dm-chip.dm-revealed {
+        color: #166534; letter-spacing: 0; font-family: inherit;
+        background: rgba(34,197,94,.1); border-color: rgba(34,197,94,.35); cursor: default;
+      }
+      .dm-chip.dm-correct {
+        color: #16a34a; letter-spacing: 0; font-family: inherit;
+        background: rgba(34,197,94,.12); border-color: rgba(34,197,94,.4);
+      }
+      .dm-chip.dm-typed-wrong {
+        color: #c41230; letter-spacing: 0; font-family: inherit;
+        background: rgba(196,18,48,.07); border-color: rgba(196,18,48,.3); cursor: default;
+      }
+
+      .dm-bottom {
+        display: flex; align-items: center; gap: 8px;
+        padding: 9px 24px; background: #ffffff;
+        border-top: 1px solid #f0d8dc; flex-shrink: 0;
+      }
+      .dm-hint-btn {
+        height: 34px; padding: 0 12px;
+        background: #fff0f2; border: 1px solid #f0d8dc;
+        border-radius: 6px; font-size: 12px; font-weight: 600;
+        font-family: inherit; color: #9a6070; cursor: pointer;
+        display: flex; align-items: center; gap: 6px; transition: all .15s;
+      }
+      .dm-hint-btn:hover { background: rgba(196,18,48,.1); color: #c41230; border-color: #c41230; }
+      .dm-hint-btn kbd {
+        display: inline-flex; align-items: center; justify-content: center;
+        height: 17px; padding: 0 4px; background: #ffffff;
+        border: 1px solid #f0d8dc; border-radius: 3px;
+        font-size: 9.5px; font-family: inherit; color: #9a6070;
+      }
+      .dm-nav { display: flex; gap: 6px; margin-left: auto; }
+      .dm-nav-btn {
+        height: 34px; padding: 0 13px;
+        background: #ffffff; border: 1px solid #f0d8dc;
+        border-radius: 6px; font-size: 12px; font-weight: 600;
+        font-family: inherit; color: #9a6070; cursor: pointer;
+        display: flex; align-items: center; gap: 5px; transition: all .15s;
+      }
+      .dm-nav-btn:hover:not(:disabled) { background: rgba(196,18,48,.08); color: #fff; border-color: #c41230; }
+      .dm-nav-btn.primary { background: #c41230; color: #fff; border-color: #c41230; }
+      .dm-nav-btn.primary:hover:not(:disabled) { background: #a50e27; }
+      .dm-nav-btn:disabled { opacity: .3; cursor: not-allowed; }
+
+      @media (max-width: 600px) {
+        .dm-shortcuts, .dm-sep { display: none; }
+        .dm-video-area { height: 30vh; }
+        .dm-vol-wrap { display: none; }
+        .dm-main { padding: 10px 12px 8px; gap: 9px; }
+        .dm-input { font-size: 16px; padding: 12px 13px; }
+
+        /* Topbar: keep 48px, scroll horizontally */
+        .dm-topbar {
+          overflow-x: auto;
+          overflow-y: hidden;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          flex-wrap: nowrap;
+          padding: 0 12px;
+          gap: 7px;
+        }
+        .dm-topbar::-webkit-scrollbar { display: none; }
+        .dm-idx { flex-shrink: 0; }
+        .dm-prog { flex-shrink: 0; }
+        .dm-right { flex-shrink: 0; gap: 5px; }
+
+/* Transcript panel → fixed bottom sheet overlay */
+        .dm-tp-header { display: flex; }
+        .dm-tp-backdrop.open { display: block; }
+        .dm-tpanel {
+          position: fixed !important;
+          bottom: 0; left: 0; right: 0;
+          display: flex !important; flex-direction: column;
+          width: 100% !important; min-width: 0 !important;
+          max-height: 60vh; z-index: 500;
+          border-left: none !important;
+          border-top: 2px solid #f0e0e4;
+          border-radius: 16px 16px 0 0;
+          box-shadow: 0 -4px 24px rgba(0,0,0,.18);
+          padding-bottom: max(8px, env(safe-area-inset-bottom));
+          /* Slide animation thay vì display:none */
+          transform: translateY(110%);
+          transition: transform .28s cubic-bezier(.4,0,.2,1);
+          pointer-events: none;
+        }
+        .dm-tpanel.tp-open {
+          transform: translateY(0);
+          pointer-events: auto;
+        }
+
+        /* Bottom bar: wrap hint buttons 2×2, nav full width */
+        .dm-bottom {
+          flex-wrap: wrap;
+          gap: 6px;
+          padding: 8px 12px max(8px, env(safe-area-inset-bottom));
+        }
+        .dm-hint-btn {
+          flex: 1 1 calc(50% - 3px);
+          font-size: 11px;
+          padding: 0 8px;
+          height: 32px;
+          justify-content: center;
+        }
+        .dm-hint-btn kbd { display: none; }
+        .dm-hint-btn svg { display: none; }
+        .dm-nav {
+          margin-left: 0;
+          width: 100%;
+          gap: 6px;
+        }
+        .dm-nav-btn {
+          flex: 1;
+          justify-content: center;
+          height: 36px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <a class="logo-home" href="all-video.html" title="Về trang chủ">
+          <div class="logo-mark">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+            >
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+          </div>
+          <span class="logo-name">MangoX Leanring Language</span>
+        </a>
+        <span class="logo-sep">/</span>
+        <span class="logo-folder" id="folderName"></span>
+      </div>
+      <div class="header-right">
+        <button class="btn-ghost" id="refreshBtn">
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+          >
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
+          </svg>
+          Tải lại
+        </button>
+        <button class="btn-primary" id="openBtn">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+            <path
+              d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+            />
+          </svg>
+          Chọn thư mục
+        </button>
+      </div>
+    </header>
+
+    <div class="banner" id="banner"></div>
+
+    <div class="main-content">
+    <div class="toolbar">
+      <div class="search-wrap">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+        <input
+          class="search"
+          type="text"
+          placeholder="Tìm clip..."
+          id="searchInput"
+        />
+      </div>
+      <select class="sort-select" id="sortSelect">
+        <option value="date-desc">Mới nhất</option>
+        <option value="date-asc">Cũ nhất</option>
+        <option value="name-asc">Tên A→Z</option>
+      </select>
+    </div>
+
+      <div id="grid">
+        <div class="empty">
+          <div class="empty-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <path
+                d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"
+              />
+            </svg>
+          </div>
+          <p>Chưa mở thư mục nào</p>
+          <small>Nhấn "Chọn thư mục" để bắt đầu duyệt clip</small>
+        </div>
+      </div>
+    </div>
+    <!-- /main-content -->
+
+    <div class="page-bar">
+      <div id="pagination" class="hidden"></div>
+      <select class="sort-select" id="perPageSelect" title="Số clip mỗi trang">
+        <option value="20">20 / trang</option>
+        <option value="40">40 / trang</option>
+        <option value="80">80 / trang</option>
+        <option value="160">160 / trang</option>
+        <option value="all">Tất cả</option>
+      </select>
+    </div>
+
+    <div class="modal-backdrop" id="modal">
+      <div class="modal">
+        <div class="modal-header">
+          <div class="modal-title" id="modalTitle"></div>
+          <button class="modal-close" id="modalClose">✕</button>
+        </div>
+        <div class="modal-content">
+          <button
+            class="modal-nav modal-nav-prev"
+            id="modalPrev"
+            aria-label="Slide trước"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.4"
+            >
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <iframe
+            id="modalFrame"
+            src="about:blank"
+            sandbox="allow-scripts allow-same-origin"
+          ></iframe>
+          <video
+            id="modalVideo"
+            controls
+            playsinline
+            style="
+              display: none;
+              max-height: 100%;
+              max-width: 100%;
+              width: auto;
+              height: auto;
+            "
+          ></video>
+          <button
+            class="modal-nav modal-nav-next"
+            id="modalNext"
+            aria-label="Slide kế"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.4"
+            >
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </div>
+        <div class="modal-note">
+          <ul>
+            <li>
+              Chưa có lồng tiếng nhưng khi xuất ra clip sẽ có lồng tiếng, click
+              vào clip để xem nhanh màn hình kế tiếp
+            </li>
+            <li>
+              Có thể chèn video vào giữa slide, nhưng vì làm nhanh và nhẹ nên
+              đang bỏ video đi.
+            </li>
+          </ul>
+        </div>
+        <div class="modal-actions">
+          <a
+            class="modal-faq-link"
+            href="faq.html"
+            target="_blank"
+            rel="noopener"
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.4"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            Giải đáp thắc mắc
+          </a>
+          <button class="btn-md btn-open-new" id="modalOpenNew">
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+            >
+              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+            Mở tab mới
+          </button>
+          <button
+            class="btn-md btn-toggle-view"
+            id="modalToggle"
+            style="display: none"
+          >
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+            >
+              <polygon points="5 3 19 12 5 21 5 3" />
+            </svg>
+            Xem MP4
+          </button>
+          <a class="btn-md btn-dl-mp4" id="modalDownload" style="display: none">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+            >
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+            Tải MP4
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ Dictation Modal ══════════════════════════════════ -->
+    <div class="dm-backdrop" id="dictModal">
+
+      <!-- Video (top, full-width) -->
+      <div class="dm-video-area">
+        <video id="dmPlayer" preload="auto"></video>
+      </div>
+
+      <!-- Custom media controls -->
+      <div class="dm-controls">
+        <button class="dm-ctrl-btn" id="dmBtnSkipBack" title="Đầu câu">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="4" width="2.5" height="16" rx="1"/><path d="M19 5v14l-10-7 10-7z"/></svg>
+        </button>
+        <button class="dm-ctrl-btn" id="dmBtnReplayCtrl" title="Nghe lại (Ctrl)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.36"/></svg>
+        </button>
+        <button class="dm-ctrl-btn dm-pp" id="dmBtnPP" title="Phát/Dừng">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        </button>
+        <button class="dm-ctrl-btn" id="dmBtnSkipFwd" title="Câu tiếp">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="16.5" y="4" width="2.5" height="16" rx="1"/><path d="M5 5v14l10-7L5 5z"/></svg>
+        </button>
+        <div class="dm-seekbar-wrap" id="dmSeekWrap">
+          <div class="dm-seekbar-fill" id="dmSeekFill"></div>
+        </div>
+        <span class="dm-time" id="dmTime">0:00 / 0:00</span>
+        <div class="dm-speed-btns">
+          <button class="dm-speed-btn" data-rate="0.5">0.5x</button>
+          <button class="dm-speed-btn" data-rate="0.75">0.75x</button>
+          <button class="dm-speed-btn active" data-rate="1">1x</button>
+          <button class="dm-speed-btn" data-rate="1.25">1.25x</button>
+          <button class="dm-speed-btn" data-rate="1.5">1.5x</button>
+        </div>
+        <div class="dm-vol-wrap">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+          </svg>
+          <input type="range" class="dm-vol-slider" id="dmVolSlider" min="0" max="1" step="0.05" value="1">
+        </div>
+      </div>
+
+      <!-- Info / stats bar -->
+      <div class="dm-topbar">
+        <span class="dm-idx" id="dmIdx">#1</span>
+        <div class="dm-prog">
+          <span id="dmWords">0/0 từ</span>
+          <span>·</span>
+          <span class="dm-match" id="dmMatch">Khớp: 0%</span>
+        </div>
+        <div class="dm-sep"></div>
+        <div class="dm-shortcuts">
+          <kbd>Tab</kbd> sang câu tiếp
+          <span style="margin:0 3px">·</span>
+          <kbd>Ctrl</kbd> nghe lại
+        </div>
+        <div class="dm-right">
+          <button class="dm-btn" id="dmBtnSave" style="display:none">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Lưu câu
+          </button>
+          <button class="dm-btn dm-btn-sz" id="dmBtnFd">-A</button>
+          <button class="dm-btn dm-btn-sz" id="dmBtnFi">+A</button>
+          <button class="dm-btn on" id="dmBtnAuto">→ Tự động</button>
+          <button class="dm-btn on" id="dmBtnTPanel">Transcript</button>
+          <button class="dm-btn" id="dmBtnTrans">Ẩn dịch</button>
+          <button class="dm-btn" id="dmClose">✕ Đóng</button>
+        </div>
+      </div>
+
+      <!-- Segment progress bar -->
+      <div class="dm-pbar"><div class="dm-pbar-fill" id="dmPbar" style="width:0%"></div></div>
+
+      <!-- Main dictation area + transcript panel -->
+      <div class="dm-content">
+      <div class="dm-main">
+        <div>
+          <input class="dm-input" id="dmInput" type="text"
+            placeholder="Điền câu đã nghe..."
+            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+          <div class="dm-trans hide" id="dmTrans"></div>
+        </div>
+        <div class="dm-tags" id="dmTags"></div>
+        <div class="dm-word-section">
+          <div class="dm-ws-hdr">
+            <div class="dm-ws-lbl">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+              Nhấn để xem
+            </div>
+            <div class="dm-ws-right">
+              <span class="dm-hidden-count" id="dmHidden"></span>
+              <button class="dm-showall" id="dmBtnShowAll">Hiện tất cả</button>
+            </div>
+          </div>
+          <div class="dm-grid" id="dmGrid"></div>
+        </div>
+      </div>
+
+      <!-- Backdrop for mobile transcript overlay (tap to close) -->
+      <div class="dm-tp-backdrop" id="dmTpBackdrop"></div>
+
+      <!-- Transcript panel (right) -->
+      <div class="dm-tpanel" id="dmTPanel">
+        <div class="dm-tp-header">
+          <span class="dm-tp-title">Transcript</span>
+          <button class="dm-tp-close" id="dmTpClose" aria-label="Đóng">✕</button>
+        </div>
+      </div>
+
+      </div><!-- /.dm-content -->
+
+      <!-- Bottom hints & nav -->
+      <div class="dm-bottom">
+        <button class="dm-hint-btn" id="dmBtnFL">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+          Chữ cái đầu <kbd>Opt+H</kbd>
+        </button>
+        <button class="dm-hint-btn" id="dmBtnLL">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
+          Chữ cái cuối <kbd>Opt+J</kbd>
+        </button>
+        <button class="dm-hint-btn" id="dmBtnBoth">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/><polyline points="7 13 12 18 17 13"/></svg>
+          Đầu &amp; Cuối <kbd>Opt+K</kbd>
+        </button>
+        <button class="dm-hint-btn" id="dmBtnRO">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          Xem từ <kbd>Opt+R</kbd>
+        </button>
+        <div class="dm-nav">
+          <button class="dm-nav-btn" id="dmBtnPrev">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            Trước
+          </button>
+          <button class="dm-nav-btn primary" id="dmBtnNext">
+            Tiếp theo
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const DB_NAME = 'clip-gallery';
+      const DB_STORE = 'handles';
+      const DB_KEY = 'output-dir';
+      // Smaller default page on phones: 1080×1920 thumbnails decode to ~8MB
+      // each in RAM, so fewer-per-page keeps mobile browsers from OOM-crashing.
+      const DEFAULT_LIMIT = window.matchMedia('(max-width: 640px)').matches
+        ? '40'
+        : '80';
+
+      // ── Category taxonomy (key → label · accent color) ──────────────────
+      const CATS = {
+        'nha-dep': { label: 'Nhà đẹp & Kiến trúc', color: '#16a34a' },
+        'bat-dong-san': { label: 'Bất động sản & Quy hoạch', color: '#c41230' },
+        'thuong-hieu': { label: 'Thương hiệu & Sản phẩm', color: '#d97706' },
+        'cong-nghe': { label: 'Công nghệ & AI', color: '#2563eb' },
+        'thoi-su': { label: 'Thời sự & Đời sống', color: '#db2777' },
+        khac: { label: 'Khác', color: '#6b7280' },
+      };
+      const CAT_ORDER = [
+        'nha-dep',
+        'bat-dong-san',
+        'thuong-hieu',
+        'cong-nghe',
+        'thoi-su',
+        'khac',
+      ];
+      const catKey = (c) =>
+        c.category && CATS[c.category] ? c.category : 'khac';
+      const catLabel = (k) => (CATS[k] ? CATS[k].label : k);
+      const catColor = (k) => (CATS[k] ? CATS[k].color : '#6b7280');
+      const catRank = (k) => {
+        const i = CAT_ORDER.indexOf(k);
+        return i < 0 ? 99 : i;
+      };
+      // Style design: clip không khai báo style → coi như "AI Generate".
+      const styleLabel = (c) => (c.style || '').trim() || 'AI Generate';
+
+      // LIMIT is a string: a numeric page size, or "all"
+      let LIMIT = (() => {
+        const v =
+          new URLSearchParams(location.search).get('limit') || DEFAULT_LIMIT;
+        if (v === 'all') return 'all';
+        const n = parseInt(v, 10);
+        return n > 0 ? String(n) : DEFAULT_LIMIT;
+      })();
+
+      // Resolve the effective page size for a given total count.
+      function pageSize(total) {
+        return LIMIT === 'all' ? Math.max(total, 1) : parseInt(LIMIT, 10);
+      }
+
+      // Ensure ?page and ?limit always present in URL on load
+      (function initParams() {
+        const url = new URL(location.href);
+        let changed = false;
+        if (!url.searchParams.has('page')) {
+          url.searchParams.set('page', '1');
+          changed = true;
+        }
+        if (!url.searchParams.has('limit')) {
+          url.searchParams.set('limit', LIMIT);
+          changed = true;
+        }
+        if (changed) history.replaceState(null, '', url);
+      })();
+
+      let allClips = [];
+      let dirHandle = null;
+
+      // Thumbnails are 1080×1920 → ~8MB decoded each. Keeping all of them
+      // decoded crashes mobile Safari ("A problem repeatedly occurred").
+      // This observer loads a thumbnail only when it nears the viewport and
+      // frees the decoded bitmap (removes src) once it scrolls far away, so
+      // peak image memory stays bounded no matter how many clips there are.
+      const thumbObserver = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            const img = e.target;
+            if (e.isIntersecting) {
+              if (
+                img.dataset.src &&
+                img.getAttribute('src') !== img.dataset.src
+              )
+                img.src = img.dataset.src;
+            } else if (img.getAttribute('src')) {
+              img.removeAttribute('src');
+            }
+          }
+        },
+        { root: null, rootMargin: '600px 0px', threshold: 0 },
+      );
+
+      const grid = document.getElementById('grid');
+      const pagination = document.getElementById('pagination');
+      const searchInput = document.getElementById('searchInput');
+      const sortSelect = document.getElementById('sortSelect');
+      const perPageSelect = document.getElementById('perPageSelect');
+      const openBtn = document.getElementById('openBtn');
+      const refreshBtn = document.getElementById('refreshBtn');
+      const folderName = document.getElementById('folderName');
+      const modal = document.getElementById('modal');
+      const modalFrame = document.getElementById('modalFrame');
+      const modalVideo = document.getElementById('modalVideo');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalOpenNew = document.getElementById('modalOpenNew');
+      const modalDl = document.getElementById('modalDownload');
+      const modalToggle = document.getElementById('modalToggle');
+      const modalPrev = document.getElementById('modalPrev');
+      const modalNext = document.getElementById('modalNext');
+
+      // Drive the slide nav inside the iframe (same contract as its own
+      // arrow-key / click handlers) by dispatching a keydown into it.
+      function slideNav(key) {
+        try {
+          const win = modalFrame.contentWindow;
+          if (!win) return;
+          win.document.dispatchEvent(
+            new win.KeyboardEvent('keydown', { key, bubbles: true }),
+          );
+        } catch (_) {}
+      }
+      modalPrev.addEventListener('click', () => slideNav('ArrowLeft'));
+      modalNext.addEventListener('click', () => slideNav('ArrowRight'));
+
+      // iframe khít stage 9:16 nhưng làm tròn subpixel để hở ~1px → nền body
+      // (tối) của clip lòi ra thành đường đen xấu ở mép. Ép nền document trong
+      // iframe = nền modal (#e3e3e3) để khe đó trùng nền, mất đường đen. iframe
+      // cùng origin nên chèn được. Chỉ đổi nền document, KHÔNG đụng stage clip.
+      modalFrame.addEventListener('load', () => {
+        try {
+          const doc = modalFrame.contentDocument;
+          if (!doc || !doc.head || doc.getElementById('__mx_framebg')) return;
+          const s = doc.createElement('style');
+          s.id = '__mx_framebg';
+          s.textContent = 'html,body{background:#e3e3e3 !important;}';
+          doc.head.appendChild(s);
+        } catch (_) {}
+      });
+      const banner = document.getElementById('banner');
+      let _modalInMp4 = false;
+
+      function getPage() {
+        return Math.max(
+          1,
+          parseInt(new URLSearchParams(location.search).get('page') || '1', 10),
+        );
+      }
+      function setPage(p, replace = false) {
+        const url = new URL(location.href);
+        url.searchParams.set('page', p);
+        url.searchParams.set('limit', LIMIT);
+        replace
+          ? history.replaceState(null, '', url)
+          : history.pushState(null, '', url);
+      }
+
+      // Sync selects with current state (called once on load).
+      perPageSelect.value = LIMIT;
+
+      function openDB() {
+        return new Promise((res, rej) => {
+          const req = indexedDB.open(DB_NAME, 1);
+          req.onupgradeneeded = (e) =>
+            e.target.result.createObjectStore(DB_STORE);
+          req.onsuccess = (e) => res(e.target.result);
+          req.onerror = (e) => rej(e.target.error);
+        });
+      }
+      async function saveHandle(handle) {
+        const db = await openDB();
+        return new Promise((res, rej) => {
+          const tx = db.transaction(DB_STORE, 'readwrite');
+          tx.objectStore(DB_STORE).put(handle, DB_KEY);
+          tx.oncomplete = res;
+          tx.onerror = rej;
+        });
+      }
+      async function loadHandle() {
+        const db = await openDB();
+        return new Promise((res, rej) => {
+          const tx = db.transaction(DB_STORE, 'readonly');
+          const req = tx.objectStore(DB_STORE).get(DB_KEY);
+          req.onsuccess = (e) => res(e.target.result);
+          req.onerror = rej;
+        });
+      }
+
+      function showBanner(type, html) {
+        banner.className = `banner ${type}`;
+        banner.innerHTML = html;
+      }
+      function hideBanner() {
+        banner.className = 'banner';
+      }
+
+      // ──────────────────────────────────────────────────────────────────
+      // HYBRID: 1 file chạy cả R2 lẫn local.
+      //  - Bản deploy: gen-clip-array bồi mảng CLIPS vào (giữa 2 marker) →
+      //    loadEmbedded() chạy, dùng URL tương đối (R2 hoặc file:// cạnh output/).
+      //  - Source giữ CLIPS rỗng → mở local rơi về chọn thư mục (duyệt live).
+      // ──────────────────────────────────────────────────────────────────
+      const CLIPS = [
+        /* CLIPS:START */
+        /* CLIPS:END */
+      ];
+
+      function loadEmbedded() {
+        allClips = CLIPS.filter((c) => c && c.slug).map((c) => {
+          const base = `output/${encodeURIComponent(c.slug)}`;
+          const clip = {
+            slug: c.slug,
+            hasHtml: true,
+            hasMp4: !!c.hasMp4,
+            mp4Name: c.mp4,
+            title: c.title,
+            topic: c.topic,
+            category: c.category,
+            style: c.style,
+            createdAt: c.createdAt,
+            updatedAt: c.createdAt,
+            htmlBlob: `${base}/index.html`,
+          };
+          if (c.thumb) clip.thumbUrl = `${base}/${encodeURIComponent(c.thumb)}`;
+          if (c.hasMp4 && c.mp4)
+            clip.mp4Blob = `${base}/${encodeURIComponent(c.mp4)}`;
+          return clip;
+        });
+        openBtn.style.display = 'none';
+        refreshBtn.classList.remove('visible');
+        folderName.style.display = 'none';
+        hideBanner();
+        render();
+      }
+
+      (async () => {
+        // Có dữ liệu nhúng → dùng luôn.
+        if (CLIPS.filter((c) => c && c.slug).length) {
+          loadEmbedded();
+          return;
+        }
+
+        // R2 mode: khi chạy từ r2.dev, domain riêng, hoặc localhost → tự load manifest
+        const isR2 = window.location.hostname.includes('r2.dev') ||
+                     window.location.hostname.includes('cloudflare') ||
+                     window.location.hostname.includes('mangox.dev') ||
+                     window.location.hostname === 'localhost' ||
+                     window.location.hostname === '127.0.0.1';
+        if (isR2) {
+          try {
+            const manifest = await fetch('./manifest.json').then(r => r.json());
+            const origin = window.location.origin;
+            const fixUrl = u => u ? u.replace(/^https?:\/\/[^/]+/, origin) : u;
+            allClips = manifest.map(c => ({
+              ...c,
+              mp4Url: fixUrl(c.mp4Url),
+              thumbUrl: fixUrl(c.thumbUrl),
+              transcriptUrls: c.transcriptUrls ? c.transcriptUrls.map(fixUrl) : c.transcriptUrls,
+              hasMp4: !!c.mp4Url,
+              hasHtml: false,
+            }));
+            openBtn.style.display = 'none';
+            refreshBtn.classList.remove('visible');
+            hideBanner();
+            render();
+            return;
+          } catch (e) { console.warn('manifest.json không tải được', e); }
+        }
+
+        if (!('showDirectoryPicker' in window)) {
+          showBanner(
+            'error',
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>' +
+              '<span>Trình duyệt không hỗ trợ. Dùng <strong>Chrome</strong> hoặc <strong>Edge</strong> mới nhất.</span>',
+          );
+          openBtn.disabled = true;
+          return;
+        }
+        try {
+          const stored = await loadHandle();
+          if (!stored) return;
+          const perm = await stored.queryPermission({ mode: 'read' });
+          if (perm === 'granted') {
+            dirHandle = stored;
+            await scan();
+          } else if (perm === 'prompt') {
+            dirHandle = stored;
+            openBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg> Mở lại "${stored.name}"`;
+            openBtn.dataset.reopen = '1';
+          }
+        } catch {}
+      })();
+
+      openBtn.addEventListener('click', async () => {
+        try {
+          if (openBtn.dataset.reopen === '1' && dirHandle) {
+            // Có handle cũ → chỉ cần xin lại quyền, không cần chọn lại thư mục
+            const perm = await dirHandle.requestPermission({ mode: 'read' });
+            if (perm === 'granted') { delete openBtn.dataset.reopen; setPage(1, true); await scan(); }
+            return;
+          }
+          const handle = await window.showDirectoryPicker({ mode: 'read' });
+          dirHandle = handle;
+          await saveHandle(handle);
+          setPage(1, true);
+          await scan();
+        } catch (e) {
+          if (e.name !== 'AbortError') console.error(e);
+        }
+      });
+
+      async function scan() {
+        if (!dirHandle) return;
+        folderName.textContent = dirHandle.name;
+        folderName.style.display = '';
+        openBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg> Đổi thư mục`;
+        refreshBtn.classList.add('visible');
+        hideBanner();
+
+        allClips = [];
+
+        // Pass 1: phân loại tất cả entries
+        const rootMp4s = [];    // { name, entry } — file mp4 trực tiếp trong root
+        const partsDirs = {};   // dirName -> entry  — thư mục *_parts (chỉ dùng cho transcript)
+        const subDirs = [];     // { name, entry }   — các thư mục khác (HTML clips)
+
+        for await (const [name, entry] of dirHandle.entries()) {
+          if (entry.kind === 'file' && name.toLowerCase().endsWith('.mp4')) {
+            rootMp4s.push({ name, entry });
+          } else if (entry.kind === 'directory') {
+            if (name.endsWith('_parts')) {
+              partsDirs[name] = entry;
+            } else {
+              subDirs.push({ name, entry });
+            }
+          }
+        }
+
+        // Pass 2a: root mp4 → hiển thị thành gallery card, link với _parts/ nếu có
+        for (const { name, entry } of rootMp4s) {
+          const clip = {
+            slug: name.replace(/\.mp4$/i, ''),
+            hasHtml: false, hasMp4: true,
+            mp4Name: name,
+            title: name.replace(/\.mp4$/i, ''),
+          };
+          try {
+            const file = await entry.getFile();
+            clip.mp4Blob = URL.createObjectURL(file);
+            clip.createdAt = file.lastModified;
+            clip.updatedAt = file.lastModified;
+          } catch {}
+
+          // Tìm thumbnail _thumb.jpg cạnh file mp4
+          try {
+            const thumbName = name.replace(/\.mp4$/i, '_thumb.jpg');
+            const thumbEntry = await dirHandle.getFileHandle(thumbName);
+            const thumbFile = await thumbEntry.getFile();
+            clip.thumbUrl = URL.createObjectURL(thumbFile);
+          } catch {}
+
+          // Tìm _parts/ dir tương ứng (để merge transcript khi luyện dictation)
+          const partsKey = findPartsDir(name, Object.keys(partsDirs));
+          if (partsKey) {
+            clip.hasTranscript = true;
+            clip.partsDir = partsKey;
+          } else {
+            // Fallback: tìm file _transcript.json ngang hàng (single-file transcript)
+            try {
+              const trName = name.replace(/\.mp4$/i, '_transcript.json');
+              await dirHandle.getFileHandle(trName);
+              clip.hasTranscript = true;
+              clip.transcriptName = trName;
+            } catch {}
+          }
+          allClips.push(clip);
+        }
+
+        // Pass 2b: subdirs — hỗ trợ cả cấu trúc mới (video.mp4) lẫn cũ (index.html)
+        for (const { name, entry } of subDirs) {
+          let hasHtml = false, hasVideoMp4 = false, thumbName = null, hasPartsDir = false;
+          const mp4Files = [];
+          for await (const [fname, fentry] of entry.entries()) {
+            if (fname === 'index.html') hasHtml = true;
+            if (fname === 'video.mp4') hasVideoMp4 = true;
+            if (fname === 'thumb.jpg') thumbName = 'thumb.jpg';
+            if (fname.toLowerCase().endsWith('.mp4')) mp4Files.push(fname);
+            if (fname.match(/-(thumbnail)\.(jpg|png|webp)$/i)) thumbName = fname;
+            if (fname === 'parts' && fentry.kind === 'directory') hasPartsDir = true;
+          }
+
+          // Cấu trúc mới: output/<slug>/video.mp4
+          if (hasVideoMp4) {
+            const sub = await dirHandle.getDirectoryHandle(name);
+            const clip = { slug: name, hasHtml: false, hasMp4: true, mp4Name: 'video.mp4',
+                           title: name.replace(/_/g, ' ') };
+            try {
+              const mp4File = await (await sub.getFileHandle('video.mp4')).getFile();
+              clip.mp4Blob = URL.createObjectURL(mp4File);
+              clip.createdAt = mp4File.lastModified;
+              clip.updatedAt = mp4File.lastModified;
+            } catch {}
+            try {
+              if (thumbName) {
+                const f = await (await sub.getFileHandle(thumbName)).getFile();
+                clip.thumbUrl = URL.createObjectURL(f);
+              }
+            } catch {}
+            if (hasPartsDir) {
+              clip.hasTranscript = true;
+              clip.partsSubDir = name; // dùng để load transcript khi luyện dictation
+              clip._subDirHandle = sub;
+            }
+            allClips.push(clip);
+            continue;
+          }
+
+          // Cấu trúc cũ: output/<slug>/index.html
+          if (!hasHtml) continue;
+
+          const sub = await dirHandle.getDirectoryHandle(name);
+          const clip = { slug: name, hasHtml: true };
+          if (mp4Files.length) { clip.hasMp4 = true; clip.mp4Name = mp4Files[0]; }
+          try {
+            if (thumbName) {
+              const f = await (await sub.getFileHandle(thumbName)).getFile();
+              clip.thumbUrl = URL.createObjectURL(f);
+            }
+            const htmlFile = await (await sub.getFileHandle('index.html')).getFile();
+            clip.htmlBlob = URL.createObjectURL(htmlFile);
+            clip.createdAt = htmlFile.lastModified;
+            clip.updatedAt = htmlFile.lastModified;
+            try {
+              const metaFile = await (await sub.getFileHandle('metadata.json')).getFile();
+              const meta = JSON.parse(await metaFile.text());
+              if (meta.title) clip.title = meta.title;
+              if (meta.topic) clip.topic = meta.topic;
+              if (meta.category) clip.category = meta.category;
+              if (meta.style) clip.style = meta.style;
+              if (meta.createdAt) clip.createdAt = new Date(meta.createdAt).getTime();
+              if (meta.updatedAt) clip.updatedAt = new Date(meta.updatedAt).getTime();
+            } catch {}
+            if (clip.hasMp4) {
+              const mp4File = await (await sub.getFileHandle(clip.mp4Name)).getFile();
+              clip.mp4Blob = URL.createObjectURL(mp4File);
+            }
+          } catch {}
+          allClips.push(clip);
+        }
+
+        render();
+      }
+
+      // Tìm thư mục _parts/ phù hợp nhất cho một file mp4.
+      // Nếu chỉ có 1 → dùng luôn. Nếu nhiều → match theo prefix chung dài nhất.
+      function findPartsDir(mp4Name, partsDirNames) {
+        if (!partsDirNames.length) return null;
+        if (partsDirNames.length === 1) return partsDirNames[0];
+        const base = mp4Name.replace(/\.mp4$/i, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        let best = null, bestLen = -1;
+        for (const k of partsDirNames) {
+          const kBase = k.replace(/_parts$/, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+          let len = 0;
+          while (len < base.length && len < kBase.length && base[len] === kBase[len]) len++;
+          if (len > bestLen) { bestLen = len; best = k; }
+        }
+        return best || partsDirNames[0];
+      }
+
+      function fmtDate(ts) {
+        if (!ts) return '';
+        return new Date(ts).toLocaleDateString('vi-VN', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        });
+      }
+
+      // "25/05/2026" → "Ngày 25/5/2026" (header label for date groups)
+      function groupLabel(key) {
+        if (key === 'Không rõ ngày') return key;
+        const [d, m, y] = key.split('/');
+        return `Ngày ${parseInt(d, 10)}/${parseInt(m, 10)}/${y}`;
+      }
+
+      function filtered() {
+        const q = searchInput.value.toLowerCase().trim();
+        let list = allClips.filter((c) => {
+          if (!q) return true;
+          return (
+            c.slug.toLowerCase().includes(q) ||
+            (c.title || '').toLowerCase().includes(q)
+          );
+        });
+        const s = sortSelect.value;
+        if (s === 'date-desc') list.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+        if (s === 'date-asc')  list.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+        if (s === 'name-asc')  list.sort((a, b) => a.slug.localeCompare(b.slug));
+        return list;
+      }
+
+      function render() {
+        const list = filtered();
+        const PAGE_SIZE = pageSize(list.length);
+        const page = getPage();
+        const totalPages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+        const safePage = Math.min(page, totalPages);
+        if (safePage !== page) setPage(safePage, true);
+
+        const start = (safePage - 1) * PAGE_SIZE;
+        const pageItems = list.slice(start, start + PAGE_SIZE);
+
+        if (!list.length) {
+          grid.innerHTML = `<div class="empty">
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </div>
+      <p>${allClips.length ? 'Không tìm thấy clip nào' : 'Thư mục trống'}</p>
+      <small>${allClips.length ? 'Thử từ khoá khác' : 'Chưa có clip nào được tạo'}</small>
+    </div>`;
+          pagination.className = 'hidden';
+          return;
+        }
+
+        const cardsHtml = pageItems.map((c, i) => {
+          const idx = start + i;
+          const displayTitle = c.title || c.slug.replace(/-/g, ' ');
+          const createdStr = fmtDate(c.createdAt);
+          const updatedStr = fmtDate(c.updatedAt);
+          const showUpdated = c.updatedAt && c.updatedAt !== c.createdAt;
+
+          const thumb = c.thumbUrl
+            ? `<img class="lazy-thumb" data-src="${c.thumbUrl}" alt="${c.slug}" decoding="async">`
+            : c.htmlBlob
+              ? `<div class="thumb-iframe-wrap" data-html="${c.htmlBlob}">
+           <iframe class="thumb-iframe" sandbox="allow-scripts allow-same-origin" tabindex="-1"></iframe>
+           <div class="thumb-hint">
+             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+             <span>Hover để xem</span>
+           </div>
+         </div>`
+              : `<div class="thumb-placeholder">
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="2"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+           <span>${c.mp4Name || 'MP4'}</span>
+         </div>`;
+
+          return `
+    <div class="card" onclick="openClip(${idx})" onmouseenter="previewOn(this)" onmouseleave="previewOff(this)">
+      <div class="thumb-wrap">
+        ${thumb}
+        <span class="badge ${c.hasMp4 ? 'badge-mp4' : 'badge-html'}">${c.hasMp4 ? 'MP4' : 'HTML'}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-title" title="${displayTitle}">${displayTitle}</div>
+        ${c.topic ? `<div class="card-topic" title="${c.topic}">${c.topic}</div>` : `<div class="card-topic">${c.slug}</div>`}
+        <div class="card-footer">
+          <div class="card-date-info">
+            ${
+              createdStr
+                ? `<div class="card-date-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span class="card-date-val">${createdStr}</span>
+            </div>`
+                : ''
+            }
+            ${
+              showUpdated
+                ? `<div class="card-date-row">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              <span class="card-date-val">${updatedStr}</span>
+            </div>`
+                : ''
+            }
+          </div>
+          <div class="card-actions">
+            <button class="btn-sm btn-view" onclick="event.stopPropagation();openClip(${idx})">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Xem
+            </button>
+            ${
+              c.hasTranscript
+                ? `<button class="btn-sm btn-dictation" onclick="event.stopPropagation();openDictation(${idx})">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+              Luyện
+            </button>`
+                : ''
+            }
+          </div>
+        </div>
+      </div>
+    </div>`;
+        });
+
+        grid.innerHTML = cardsHtml.join('');
+
+        requestAnimationFrame(() => {
+          grid.querySelectorAll('.thumb-iframe-wrap').forEach((wrap) => {
+            const scale = wrap.offsetWidth / 1080;
+            wrap.querySelector('.thumb-iframe').style.transform =
+              `scale(${scale})`;
+          });
+          // Re-arm lazy load/unload for the freshly rendered thumbnails.
+          thumbObserver.disconnect();
+          grid
+            .querySelectorAll('img.lazy-thumb')
+            .forEach((img) => thumbObserver.observe(img));
+        });
+
+        renderPagination(safePage, totalPages, list.length, PAGE_SIZE);
+      }
+
+      function renderPagination(page, total, count, PAGE_SIZE) {
+        if (total <= 1) {
+          pagination.className = 'hidden';
+          return;
+        }
+        pagination.className = '';
+
+        const start = (page - 1) * PAGE_SIZE + 1;
+        const end = Math.min(page * PAGE_SIZE, count);
+        const pages = new Set(
+          [1, total, page, page - 1, page + 1].filter(
+            (p) => p >= 1 && p <= total,
+          ),
+        );
+        const sorted = [...pages].sort((a, b) => a - b);
+        let btns = '',
+          prev = 0;
+        for (const p of sorted) {
+          if (p - prev > 1)
+            btns += `<span class="page-btn" style="cursor:default;pointer-events:none">…</span>`;
+          btns += `<button class="page-btn${p === page ? ' active' : ''}" onclick="goPage(${p})">${p}</button>`;
+          prev = p;
+        }
+
+        pagination.innerHTML = `
+    <div class="page-btns">
+      <button class="page-btn" onclick="goPage(${page - 1})" ${page <= 1 ? 'disabled' : ''}>‹</button>
+      ${btns}
+      <button class="page-btn" onclick="goPage(${page + 1})" ${page >= total ? 'disabled' : ''}>›</button>
+    </div>`;
+      }
+
+      function goPage(p) {
+        setPage(p);
+        render();
+        document
+          .querySelector('.main-content')
+          .scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      window.addEventListener('popstate', render);
+
+      // Lazy preview: only the hovered card's iframe loads & plays.
+      // Skip on touch devices — there `mouseenter` fires on tap and never
+      // pairs with `mouseleave`, so the heavy animated iframe would load and
+      // keep running in the background, piling up memory until the tab crashes.
+      const CAN_HOVER = window.matchMedia('(hover: hover)').matches;
+      function previewOn(card) {
+        if (!CAN_HOVER) return;
+        const wrap = card.querySelector('.thumb-iframe-wrap[data-html]');
+        if (!wrap) return;
+        const iframe = wrap.querySelector('.thumb-iframe');
+        if (iframe && !iframe.src.startsWith('blob:')) {
+          iframe.style.transform = `scale(${wrap.offsetWidth / 1080})`;
+          iframe.src = wrap.dataset.html;
+          wrap.classList.add('playing');
+        }
+      }
+      function previewOff(card) {
+        const wrap = card.querySelector('.thumb-iframe-wrap[data-html]');
+        if (!wrap) return;
+        const iframe = wrap.querySelector('.thumb-iframe');
+        if (iframe) {
+          iframe.src = 'about:blank';
+          wrap.classList.remove('playing');
+        }
+      }
+
+      // Click card → mở modal xem clip ngay tại chỗ (như trước).
+      function openClip(i) {
+        openModal(i);
+      }
+
+      // ══════════════════════════════════════════════════════
+      // DICTATION ENGINE
+      // ══════════════════════════════════════════════════════
+      let dmSegs = [], dmCur = 0, dmRevealed = new Set();
+      let dmClipSlug = '', dmCompleted = new Set();
+      let dmHintMode = 'none', dmAutoAdv = true, dmShowTrans = false;
+      let dmFontSize = 18, dmStopFn = null, dmSegEnd = Infinity;
+
+      const dmPlayer   = document.getElementById('dmPlayer');
+      const dmModal    = document.getElementById('dictModal');
+      const dmInput    = document.getElementById('dmInput');
+      const dmIdx      = document.getElementById('dmIdx');
+      const dmWords    = document.getElementById('dmWords');
+      const dmMatch    = document.getElementById('dmMatch');
+      const dmPbar     = document.getElementById('dmPbar');
+      const dmTags     = document.getElementById('dmTags');
+      const dmGrid     = document.getElementById('dmGrid');
+      const dmTrans    = document.getElementById('dmTrans');
+      const dmHidden   = document.getElementById('dmHidden');
+      const dmSeekFill = document.getElementById('dmSeekFill');
+      const dmSeekWrap = document.getElementById('dmSeekWrap');
+      const dmTimeEl   = document.getElementById('dmTime');
+      const dmBtnPP    = document.getElementById('dmBtnPP');
+
+      const DM_PLAY_ICO  = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>`;
+      const DM_PAUSE_ICO = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>`;
+
+      function dmFmtTime(s) {
+        if (!isFinite(s) || s < 0) return '0:00';
+        return Math.floor(s / 60) + ':' + Math.floor(s % 60).toString().padStart(2, '0');
+      }
+
+      // Seek bar + time display — update on every timeupdate
+      dmPlayer.addEventListener('timeupdate', () => {
+        if (!dmPlayer.duration) return;
+        dmSeekFill.style.width = (dmPlayer.currentTime / dmPlayer.duration * 100) + '%';
+        dmTimeEl.textContent = dmFmtTime(dmPlayer.currentTime) + ' / ' + dmFmtTime(dmPlayer.duration);
+      });
+
+      // Click seek bar — nhảy tới vị trí bất kỳ, thoát khỏi chế độ dừng segment
+      dmSeekWrap.addEventListener('click', e => {
+        if (!dmPlayer.duration) return;
+        const r = dmSeekWrap.getBoundingClientRect();
+        const ratio = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+        const seekTime = ratio * dmPlayer.duration;
+
+        // Tháo stop listener cũ
+        if (dmStopFn) { dmPlayer.removeEventListener('timeupdate', dmStopFn); dmStopFn = null; }
+
+        // Tìm segment tại vị trí click
+        const segIdx = dmSegs.findIndex(s => seekTime >= s.start && seekTime <= s.end + 0.3);
+        if (segIdx >= 0) {
+          dmUpdateSegUI(segIdx);
+          dmSegEnd = dmSegs[segIdx].end;
+          dmPlayer.currentTime = seekTime;
+          dmPlayer.play().catch(() => {});
+          dmAttachStop();
+        } else {
+          // Không có segment → free-play
+          dmSegEnd = Infinity;
+          dmPlayer.currentTime = seekTime;
+          dmPlayer.play().catch(() => {});
+        }
+      });
+
+      // Play/pause button sync
+      dmPlayer.addEventListener('play',  () => { dmBtnPP.innerHTML = DM_PAUSE_ICO; });
+      dmPlayer.addEventListener('pause', () => { dmBtnPP.innerHTML = DM_PLAY_ICO; });
+      dmPlayer.addEventListener('ended', () => { dmBtnPP.innerHTML = DM_PLAY_ICO; });
+
+      dmBtnPP.addEventListener('click', () => {
+        if (dmPlayer.paused) {
+          if (!dmStopFn && isFinite(dmSegEnd)) dmAttachStop(); // re-attach nếu cần
+          dmPlayer.play().catch(() => {});
+        } else {
+          dmPlayer.pause();
+        }
+      });
+
+      // Skip to current segment start và replay với stop listener
+      document.getElementById('dmBtnSkipBack').addEventListener('click', () => {
+        if (!dmSegs[dmCur]) return;
+        dmPlaySeg(dmSegs[dmCur]);
+      });
+
+      // Replay current segment
+      document.getElementById('dmBtnReplayCtrl').addEventListener('click', dmReplay);
+
+      // Skip to next segment
+      document.getElementById('dmBtnSkipFwd').addEventListener('click', () => dmLoadSeg(dmCur + 1));
+
+      // Speed control
+      document.querySelectorAll('.dm-speed-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.dm-speed-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          dmPlayer.playbackRate = parseFloat(btn.dataset.rate);
+        });
+      });
+
+      async function openDictation(i) {
+        const c = filtered()[i];
+        if (!c || !c.hasTranscript) return;
+        try {
+          if (c.transcriptUrls) {
+            // R2 mode: fetch từng transcript JSON qua URL
+            const allSegs = [];
+            let offset = 0;
+            for (const url of c.transcriptUrls) {
+              const data = await fetch(url).then(r => r.json());
+              (data.segments || []).filter(s => s.text && s.text.trim()).forEach(s => {
+                allSegs.push({ text: s.text, start: s.start + offset, end: s.end + offset });
+              });
+              offset += data.duration || 0;
+            }
+            dmSegs = allSegs;
+          } else if (c._subDirHandle) {
+            // Local filesystem mode, cấu trúc mới: output/<slug>/parts/
+            const partsDirHandle = await c._subDirHandle.getDirectoryHandle('parts');
+            const trEntries = [];
+            for await (const [fname, fentry] of partsDirHandle.entries()) {
+              if (fname.endsWith('_transcript.json')) trEntries.push({ name: fname, entry: fentry });
+            }
+            trEntries.sort((a, b) => a.name.localeCompare(b.name));
+            const allSegs = [];
+            let offset = 0;
+            for (const { entry } of trEntries) {
+              const file = await entry.getFile();
+              const data = JSON.parse(await file.text());
+              (data.segments || []).filter(s => s.text && s.text.trim()).forEach(s => {
+                allSegs.push({ text: s.text, start: s.start + offset, end: s.end + offset });
+              });
+              offset += data.duration || 0;
+            }
+            dmSegs = allSegs;
+          } else if (c.partsDir) {
+            // Local filesystem mode, cấu trúc cũ: output/<slug>_parts/
+            const partsDirHandle = await dirHandle.getDirectoryHandle(c.partsDir);
+            const trEntries = [];
+            for await (const [fname, fentry] of partsDirHandle.entries()) {
+              if (fname.endsWith('_transcript.json')) trEntries.push({ name: fname, entry: fentry });
+            }
+            trEntries.sort((a, b) => a.name.localeCompare(b.name));
+            const allSegs = [];
+            let offset = 0;
+            for (const { entry } of trEntries) {
+              const file = await entry.getFile();
+              const data = JSON.parse(await file.text());
+              (data.segments || []).filter(s => s.text && s.text.trim()).forEach(s => {
+                allSegs.push({ text: s.text, start: s.start + offset, end: s.end + offset });
+              });
+              offset += data.duration || 0;
+            }
+            dmSegs = allSegs;
+          } else {
+            // Fallback: single _transcript.json ngang hàng
+            const trFile = await (await dirHandle.getFileHandle(c.transcriptName)).getFile();
+            const data = JSON.parse(await trFile.text());
+            dmSegs = (data.segments || []).filter(s => s.text && s.text.trim());
+          }
+          if (!dmSegs.length) return;
+
+          dmClipSlug = c.slug || '';
+          dmCompleted = new Set(JSON.parse(localStorage.getItem('dm_done_' + dmClipSlug) || '[]'));
+          dmPlayer.src = c.mp4Url || c.mp4Blob;
+          dmModal.classList.add('open');
+          dmBuildTPanel();
+          // Desktop: show panel; Mobile: start hidden (slide-up on demand)
+          const isMobileOpen = window.matchMedia('(max-width: 600px)').matches;
+          if (isMobileOpen) {
+            // Ensure panel starts closed on mobile
+            document.getElementById('dmTPanel').classList.remove('tp-open');
+            document.getElementById('dmTpBackdrop').classList.remove('open');
+            document.getElementById('dmBtnTPanel').classList.remove('on');
+          } else {
+            dmToggleTPanel(true);
+          }
+          dmLoadSeg(0);
+          setTimeout(() => dmInput.focus(), 80);
+        } catch (e) { console.error('openDictation', e); }
+      }
+
+      function dmClose() {
+        dmModal.classList.remove('open');
+        document.getElementById('dmTPanel').classList.remove('tp-open');
+        document.getElementById('dmTpBackdrop').classList.remove('open');
+        dmPlayer.pause();
+        dmPlayer.src = '';
+        dmInput.value = '';
+        dmSeekFill.style.width = '0%';
+        dmTimeEl.textContent = '0:00 / 0:00';
+        dmBtnPP.innerHTML = DM_PLAY_ICO;
+        if (dmStopFn) { dmPlayer.removeEventListener('timeupdate', dmStopFn); dmStopFn = null; }
+      }
+
+      // Detect Chinese / Japanese (không phải Korean — Korean dùng dấu cách bình thường)
+      function dmIsCJK(text) { return /[぀-鿿㐀-䶿]/.test(text); }
+
+      // CJK → tách từng ký tự; ngôn ngữ khác → tách theo khoảng trắng
+      function dmTokenize(text) {
+        if (dmIsCJK(text)) {
+          // Bỏ khoảng trắng + dấu câu CJK & fullwidth, giữ lại ký tự nội dung
+          return [...text.replace(/[\s　-〿！-￮！-～。、，…]/g, '')].filter(Boolean);
+        }
+        return text.trim().split(/\s+/).filter(Boolean);
+      }
+
+      function dmNorm(w) {
+        return w.toLowerCase()
+          .replace(/[.,!?;:'"()«»。、！？「」『』【】（）…]/g, '')
+          .trim();
+      }
+
+      function dmLoadSeg(idx) {
+        if (idx < 0 || idx >= dmSegs.length) return;
+        dmUpdateSegUI(idx);
+        dmPlaySeg(dmSegs[idx]);
+      }
+
+      function dmFmtTime(s) {
+        const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+        return `${m}:${String(sec).padStart(2, '0')}`;
+      }
+
+      function dmMarkDone(idx) {
+        if (dmCompleted.has(idx)) return;
+        dmCompleted.add(idx);
+        if (dmClipSlug) localStorage.setItem('dm_done_' + dmClipSlug, JSON.stringify([...dmCompleted]));
+        const panel = document.getElementById('dmTPanel');
+        const el = panel.querySelectorAll('.dm-tp-item')[idx];
+        if (el) el.classList.add('done');
+      }
+
+      function dmBuildTPanel() {
+        const panel = document.getElementById('dmTPanel');
+        // Remove only the segment items, keep the header
+        panel.querySelectorAll('.dm-tp-item').forEach(el => el.remove());
+        dmSegs.forEach((seg, i) => {
+          const item = document.createElement('div');
+          item.className = 'dm-tp-item' + (dmCompleted.has(i) ? ' done' : '');
+          item.innerHTML = `<div class="dm-tp-num">#${i + 1} · ${dmFmtTime(seg.start)}</div><div class="dm-tp-text">${seg.text}</div>`;
+          item.addEventListener('click', () => dmLoadSeg(i));
+          panel.appendChild(item);
+        });
+      }
+
+      function dmSyncTPanel(idx) {
+        const panel = document.getElementById('dmTPanel');
+        panel.querySelectorAll('.dm-tp-item').forEach((el, i) => {
+          el.classList.toggle('active', i === idx);
+        });
+        const active = panel.querySelector('.dm-tp-item.active');
+        if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+
+      function dmUpdateSegUI(idx) {
+        const seg = dmSegs[idx];
+        dmCur = idx; dmRevealed.clear(); dmInput.value = '';
+        document.getElementById('dmBtnShowAll').textContent = dmHintMode === 'all' ? 'Ẩn tất cả' : 'Hiện tất cả';
+        if (dmHintMode !== 'all') {
+          document.getElementById('dmBtnFL').classList.toggle('on', dmHintMode === 'first');
+          document.getElementById('dmBtnLL').classList.toggle('on', dmHintMode === 'last');
+          document.getElementById('dmBtnBoth').classList.toggle('on', dmHintMode === 'both');
+        }
+        dmIdx.textContent = `#${idx + 1}`;
+        dmPbar.style.width = `${((idx + 1) / dmSegs.length) * 100}%`;
+        document.getElementById('dmBtnPrev').disabled = idx === 0;
+        document.getElementById('dmBtnNext').disabled = idx === dmSegs.length - 1;
+        dmTrans.textContent = seg.text;
+        dmTrans.classList.toggle('hide', !dmShowTrans);
+        dmRenderTags(dmTokenize(seg.text));
+        dmRenderGrid(dmTokenize(seg.text));
+        if (dmHintMode === 'all') {
+          dmGrid.querySelectorAll('.dm-chip').forEach(chip => {
+            chip.textContent = chip.dataset.word; chip.dataset.r = '1';
+            chip.classList.add('dm-revealed');
+          });
+        }
+        dmUpdateProgress('');
+        dmSyncTPanel(idx);
+      }
+
+      function dmAttachStop() {
+        if (dmStopFn) dmPlayer.removeEventListener('timeupdate', dmStopFn);
+        dmStopFn = () => {
+          if (dmPlayer.currentTime >= dmSegEnd) {
+            dmPlayer.removeEventListener('timeupdate', dmStopFn);
+            dmStopFn = null;
+            if (dmAutoAdv && dmCur < dmSegs.length - 1) {
+              // Không dừng video — chỉ update UI và set stop tiếp theo
+              const nextIdx = dmCur + 1;
+              dmUpdateSegUI(nextIdx);
+              dmSegEnd = dmSegs[nextIdx].end;
+              dmAttachStop();
+            } else {
+              dmPlayer.pause();
+            }
+          }
+        };
+        dmPlayer.addEventListener('timeupdate', dmStopFn);
+      }
+
+      function dmPlaySeg(seg) {
+        dmSegEnd = seg.end;
+        dmPlayer.currentTime = seg.start;
+        dmPlayer.play().catch(() => {});
+        dmAttachStop();
+      }
+
+      function dmReplay() { if (dmSegs[dmCur]) dmPlaySeg(dmSegs[dmCur]); }
+
+      function dmUpdateProgress(val) {
+        const segText = dmSegs[dmCur]?.text || '';
+        const words = dmTokenize(segText);
+        const isCJK = dmIsCJK(segText);
+        // CJK: tách từng ký tự; ngôn ngữ khác: tách theo khoảng trắng
+        const typedAll = isCJK
+          ? [...val.replace(/\s/g, '')].filter(Boolean)
+          : (val.length ? val.split(/\s+/).filter(Boolean) : []);
+        let matched = 0;
+        for (let i = 0; i < Math.min(typedAll.length, words.length); i++) {
+          if (dmNorm(typedAll[i]) === dmNorm(words[i])) matched++;
+        }
+        const total = words.length;
+        const pct = total ? Math.round(matched / total * 100) : 0;
+        dmWords.textContent = `${matched}/${total} từ`;
+        dmMatch.textContent = `Khớp: ${pct}%`;
+        dmMatch.className = 'dm-match' + (pct >= 80 ? ' good' : '');
+
+        dmGrid.querySelectorAll('.dm-chip').forEach((chip, i) => {
+          if (chip.dataset.r === '1') return; // manually revealed — không đụng vào
+          const correctWord = chip.dataset.word;
+          const typedWord = typedAll[i];
+
+          if (typedWord !== undefined) {
+            // Người dùng đã gõ vị trí này → hiện ngay từ đã gõ, màu theo đúng/sai
+            chip.textContent = typedWord;
+            chip.classList.remove('dm-hint-first', 'dm-correct', 'dm-typed-wrong');
+            chip.classList.add(dmNorm(typedWord) === dmNorm(correctWord) ? 'dm-correct' : 'dm-typed-wrong');
+          } else {
+            // Chưa gõ tới → khôi phục dots hoặc trạng thái hint hiện tại
+            chip.classList.remove('dm-correct', 'dm-typed-wrong', 'dm-hint-first', 'dm-hint-last', 'dm-hint-both');
+            if (dmHintMode === 'first') {
+              chip.textContent = correctWord[0] + '·'.repeat(Math.max(correctWord.length - 1, 0));
+              chip.classList.add('dm-hint-first');
+            } else if (dmHintMode === 'last') {
+              chip.textContent = '·'.repeat(Math.max(correctWord.length - 1, 0)) + correctWord[correctWord.length - 1];
+              chip.classList.add('dm-hint-last');
+            } else if (dmHintMode === 'both') {
+              const wl = correctWord.length;
+              const mid = wl <= 2 ? '' : '·'.repeat(wl - 2);
+              chip.textContent = wl === 1 ? correctWord : correctWord[0] + mid + correctWord[wl - 1];
+              chip.classList.add('dm-hint-both');
+            } else {
+              chip.textContent = '·'.repeat(Math.max(correctWord.length, 1));
+            }
+          }
+        });
+
+        // Chỉ đếm chip vẫn đang ẩn (chưa gõ, chưa reveal)
+        const hiddenN = dmGrid.querySelectorAll('.dm-chip:not([data-r="1"]):not(.dm-correct):not(.dm-typed-wrong)').length;
+        dmHidden.textContent = hiddenN > 0 ? `${hiddenN} từ ẩn` : '';
+        if (pct === 100 && total > 0) {
+          dmMarkDone(dmCur);
+          if (dmAutoAdv) {
+            const curIdx = dmCur;
+            setTimeout(() => { if (dmCur === curIdx) dmLoadSeg(dmCur + 1); }, 500);
+          }
+        }
+      }
+
+      function dmRenderTags(words) {
+        dmTags.innerHTML = '';
+        // Proper noun detection chỉ áp dụng cho Latin — CJK không có quy tắc chữ hoa
+        if (dmIsCJK(words.join(''))) return;
+        const names = [...new Set(words.map(w => w.replace(/[.,!?;:'"()]/g, '')).filter(w => /^[A-Z][A-Za-z0-9]*$/.test(w) && w.length > 1))];
+        if (!names.length) return;
+        const pt = document.createElement('span');
+        pt.className = 'dm-tag dm-tag-proper';
+        pt.innerHTML = `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Danh từ riêng`;
+        dmTags.appendChild(pt);
+        names.forEach(n => { const t = document.createElement('span'); t.className = 'dm-tag dm-tag-name'; t.textContent = n; dmTags.appendChild(t); });
+      }
+
+      function dmRenderGrid(words) {
+        dmGrid.innerHTML = '';
+        words.forEach((word, i) => {
+          const clean = word.replace(/[.,!?;:'"()]/g, '');
+          const chip = document.createElement('div');
+          chip.className = 'dm-chip'; chip.dataset.i = i; chip.dataset.word = clean; chip.dataset.r = '0';
+          chip.textContent = '·'.repeat(Math.max(clean.length, 1));
+          chip.addEventListener('click', () => dmRevealChip(chip));
+          dmGrid.appendChild(chip);
+        });
+      }
+
+      function dmRevealChip(chip) {
+        if (chip.dataset.r === '1') return;
+        chip.textContent = chip.dataset.word; chip.dataset.r = '1';
+        chip.classList.add('dm-revealed');
+        chip.classList.remove('dm-correct', 'dm-typed-wrong', 'dm-hint-first', 'dm-hint-last', 'dm-hint-both');
+        dmRevealed.add(+chip.dataset.i); dmUpdateProgress(dmInput.value);
+      }
+
+      function dmRevealAll() {
+        dmGrid.querySelectorAll('.dm-chip').forEach(dmRevealChip);
+        dmHintMode = 'all';
+        document.getElementById('dmBtnShowAll').textContent = 'Ẩn tất cả';
+      }
+      function dmHideAll() {
+        dmHintMode = 'none';
+        dmRevealed.clear();
+        dmGrid.querySelectorAll('.dm-chip').forEach(chip => {
+          chip.dataset.r = '0';
+          chip.classList.remove('dm-revealed', 'dm-correct', 'dm-typed-wrong', 'dm-hint-first', 'dm-hint-last', 'dm-hint-both');
+          chip.textContent = '·'.repeat(Math.max(chip.dataset.word.length, 1));
+        });
+        document.getElementById('dmBtnShowAll').textContent = 'Hiện tất cả';
+        dmUpdateProgress(dmInput.value);
+      }
+      function dmHintClear() {
+        dmHintMode = 'none';
+        dmGrid.querySelectorAll('.dm-chip[data-r="0"]:not(.dm-correct):not(.dm-typed-wrong)').forEach(c => {
+          c.classList.remove('dm-hint-first', 'dm-hint-last', 'dm-hint-both');
+          c.textContent = '·'.repeat(Math.max(c.dataset.word.length, 1));
+        });
+        document.getElementById('dmBtnFL').classList.remove('on');
+        document.getElementById('dmBtnLL').classList.remove('on');
+        document.getElementById('dmBtnBoth').classList.remove('on');
+      }
+      function dmHintFirst() {
+        if (dmHintMode === 'all') return;
+        if (dmHintMode === 'first') { dmHintClear(); return; }
+        dmHintMode = 'first';
+        document.getElementById('dmBtnFL').classList.add('on');
+        document.getElementById('dmBtnLL').classList.remove('on');
+        document.getElementById('dmBtnBoth').classList.remove('on');
+        dmGrid.querySelectorAll('.dm-chip[data-r="0"]:not(.dm-correct):not(.dm-typed-wrong)').forEach(c => {
+          const w = c.dataset.word; if (!w) return;
+          c.classList.remove('dm-hint-last', 'dm-hint-both');
+          c.textContent = w[0] + '·'.repeat(Math.max(w.length - 1, 0));
+          c.classList.add('dm-hint-first');
+        });
+      }
+      function dmHintLast() {
+        if (dmHintMode === 'all') return;
+        if (dmHintMode === 'last') { dmHintClear(); return; }
+        dmHintMode = 'last';
+        document.getElementById('dmBtnFL').classList.remove('on');
+        document.getElementById('dmBtnLL').classList.add('on');
+        document.getElementById('dmBtnBoth').classList.remove('on');
+        dmGrid.querySelectorAll('.dm-chip[data-r="0"]:not(.dm-correct):not(.dm-typed-wrong)').forEach(c => {
+          const w = c.dataset.word; if (!w) return;
+          c.classList.remove('dm-hint-first', 'dm-hint-both');
+          c.textContent = '·'.repeat(Math.max(w.length - 1, 0)) + w[w.length - 1];
+          c.classList.add('dm-hint-last');
+        });
+      }
+      function dmHintBoth() {
+        if (dmHintMode === 'all') return;
+        if (dmHintMode === 'both') { dmHintClear(); return; }
+        dmHintMode = 'both';
+        document.getElementById('dmBtnFL').classList.remove('on');
+        document.getElementById('dmBtnLL').classList.remove('on');
+        document.getElementById('dmBtnBoth').classList.add('on');
+        dmGrid.querySelectorAll('.dm-chip[data-r="0"]:not(.dm-correct):not(.dm-typed-wrong)').forEach(c => {
+          const w = c.dataset.word; if (!w) return;
+          c.classList.remove('dm-hint-first', 'dm-hint-last');
+          const mid = w.length <= 2 ? '' : '·'.repeat(w.length - 2);
+          c.textContent = w.length === 1 ? w : w[0] + mid + w[w.length - 1];
+          c.classList.add('dm-hint-both');
+        });
+      }
+      function dmRevealOne() { const n = dmGrid.querySelector('.dm-chip[data-r="0"]'); if (n) dmRevealChip(n); }
+
+      // Button wiring
+      document.getElementById('dmClose').addEventListener('click', dmClose);
+      document.getElementById('dmBtnNext').addEventListener('click', () => dmLoadSeg(dmCur + 1));
+      document.getElementById('dmBtnPrev').addEventListener('click', () => dmLoadSeg(dmCur - 1));
+      document.getElementById('dmBtnShowAll').addEventListener('click', () => {
+        dmHintMode === 'all' ? dmHideAll() : dmRevealAll();
+      });
+      document.getElementById('dmBtnFL').addEventListener('click', dmHintFirst);
+      document.getElementById('dmBtnLL').addEventListener('click', dmHintLast);
+      document.getElementById('dmBtnBoth').addEventListener('click', dmHintBoth);
+      document.getElementById('dmBtnRO').addEventListener('click', dmRevealOne);
+      document.getElementById('dmBtnFd').addEventListener('click', () => { dmFontSize = Math.max(12, dmFontSize - 2); dmInput.style.fontSize = dmFontSize + 'px'; });
+      document.getElementById('dmBtnFi').addEventListener('click', () => { dmFontSize = Math.min(30, dmFontSize + 2); dmInput.style.fontSize = dmFontSize + 'px'; });
+      document.getElementById('dmBtnAuto').addEventListener('click', function() {
+        dmAutoAdv = !dmAutoAdv;
+        this.textContent = dmAutoAdv ? '→ Tự động' : '→ Dừng';
+        this.classList.toggle('on', dmAutoAdv);
+        // Nếu vừa bật và video đang dừng giữa chừng → phát tiếp luôn
+        if (dmAutoAdv && dmPlayer.paused && dmSegs[dmCur]) {
+          if (!dmStopFn && isFinite(dmSegEnd)) dmAttachStop();
+          dmPlayer.play().catch(() => {});
+        }
+      });
+      function dmToggleTPanel(show) {
+        const panel    = document.getElementById('dmTPanel');
+        const btn      = document.getElementById('dmBtnTPanel');
+        const backdrop = document.getElementById('dmTpBackdrop');
+        const isMobile = window.matchMedia('(max-width: 600px)').matches;
+
+        if (isMobile) {
+          // Mobile: dùng class tp-open + slide animation (không dùng display:none)
+          const opening = show !== undefined ? show : !panel.classList.contains('tp-open');
+          panel.classList.toggle('tp-open', opening);
+          btn.classList.toggle('on', opening);
+          if (backdrop) backdrop.classList.toggle('open', opening);
+        } else {
+          // Desktop: sidebar — toggle display bình thường
+          const visible = show !== undefined ? show : (panel.style.display === 'none');
+          panel.style.display = visible ? '' : 'none';
+          btn.classList.toggle('on', visible);
+        }
+      }
+      document.getElementById('dmBtnTPanel').addEventListener('click', () => dmToggleTPanel());
+      document.getElementById('dmTpBackdrop').addEventListener('click', () => dmToggleTPanel(false));
+      document.getElementById('dmTpClose').addEventListener('click', () => dmToggleTPanel(false));
+      document.getElementById('dmBtnTrans').addEventListener('click', function() {
+        dmShowTrans = !dmShowTrans;
+        this.textContent = dmShowTrans ? 'Hiện dịch' : 'Ẩn dịch';
+        this.classList.toggle('on', dmShowTrans);
+        dmTrans.classList.toggle('hide', !dmShowTrans);
+      });
+      document.getElementById('dmBtnSave').addEventListener('click', function() {
+        const seg = dmSegs[dmCur]; if (!seg) return;
+        const saves = JSON.parse(localStorage.getItem('dictSaved') || '[]');
+        saves.push({ idx: dmCur + 1, text: seg.text, typed: dmInput.value, ts: Date.now() });
+        localStorage.setItem('dictSaved', JSON.stringify(saves));
+        this.classList.add('on'); setTimeout(() => this.classList.remove('on'), 900);
+      });
+
+      // IME composition guard — tránh update khi đang gõ pinyin/romaji chưa confirm
+      let dmComposing = false;
+      dmInput.addEventListener('compositionstart', () => { dmComposing = true; });
+      dmInput.addEventListener('compositionend',   e  => { dmComposing = false; dmUpdateProgress(e.target.value); });
+      dmInput.addEventListener('input', e => { if (!dmComposing) dmUpdateProgress(e.target.value); });
+
+      // Keyboard shortcuts (only active when dictation modal is open)
+      document.addEventListener('keydown', e => {
+        if (!dmModal.classList.contains('open')) return;
+        const inInput = document.activeElement === dmInput;
+        if (e.key === 'Escape') { dmClose(); return; }
+        if (e.key === 'Tab' && inInput) { e.preventDefault(); dmLoadSeg(dmCur + 1); return; }
+        if (e.key === ' ' && !inInput) { e.preventDefault(); dmPlayer.paused ? dmPlayer.play().catch(() => {}) : dmPlayer.pause(); return; }
+        if (e.ctrlKey && !e.shiftKey && !e.altKey) { e.preventDefault(); dmReplay(); return; }
+        if (e.altKey && e.key.toLowerCase() === 'h') { e.preventDefault(); dmHintFirst(); return; }
+        if (e.altKey && e.key.toLowerCase() === 'j') { e.preventDefault(); dmHintLast(); return; }
+        if (e.altKey && e.key.toLowerCase() === 'k') { e.preventDefault(); dmHintBoth(); return; }
+        if (e.altKey && e.key.toLowerCase() === 'r') { e.preventDefault(); dmRevealOne(); return; }
+        if (!inInput && e.key === 'ArrowRight') dmLoadSeg(dmCur + 1);
+        if (!inInput && e.key === 'ArrowLeft') dmLoadSeg(dmCur - 1);
+      });
+
+      document.getElementById('dmVolSlider').addEventListener('input', e => {
+        dmPlayer.volume = +e.target.value;
+      });
+
+      function openModal(i) {
+        const c = filtered()[i];
+        if (!c?.htmlBlob && !c?.mp4Blob) return;
+
+        // MP4-only clip (không có HTML): phát video thẳng
+        if (!c.htmlBlob && c.mp4Blob) {
+          modalTitle.textContent = c.title || c.slug.replace(/-/g, ' ');
+          modalFrame.src = 'about:blank';
+          modalFrame.style.display = 'none';
+          modalPrev.style.display = 'none';
+          modalNext.style.display = 'none';
+          modalVideo.src = c.mp4Blob;
+          modalVideo.style.display = '';
+          modalVideo.play();
+          modalToggle.style.display = 'none';
+          modalDl.style.display = '';
+          modalDl.href = c.mp4Blob;
+          modalDl.download = c.mp4Name;
+          modalOpenNew.onclick = () => window.open(c.mp4Blob, '_blank');
+          modal.classList.add('open');
+          return;
+        }
+        // Load the clip's real file straight from output/<slug>/index.html so
+        // relative assets (audio/images/fonts) resolve correctly. Fall back to
+        // the blob URL only when no slug is available.
+        const htmlSrc = c.slug
+          ? `output/${encodeURIComponent(c.slug)}/index.html`
+          : c.htmlBlob;
+        // "Mở tab mới" → trang view.html (clip + footer), không sửa output/.
+        const viewSrc = c.slug
+          ? `view.html?slug=${encodeURIComponent(c.slug)}` +
+            `&title=${encodeURIComponent(c.title || c.slug.replace(/-/g, ' '))}` +
+            (c.hasMp4 && c.mp4Name
+              ? `&mp4=${encodeURIComponent(c.mp4Name)}`
+              : '')
+          : c.htmlBlob;
+        _modalInMp4 = false;
+        modalTitle.textContent = c.title || c.slug.replace(/-/g, ' ');
+        // Default: show HTML iframe (slide nav arrows visible)
+        modalFrame.src = htmlSrc;
+        modalFrame.style.display = '';
+        modalPrev.style.display = '';
+        modalNext.style.display = '';
+        modalVideo.style.display = 'none';
+        modalVideo.pause();
+        modalVideo.src = '';
+        modalOpenNew.onclick = () => window.open(viewSrc, '_blank');
+        if (c.mp4Blob) {
+          modalToggle.style.display = '';
+          modalToggle.classList.remove('active');
+          modalToggle.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg> Xem MP4`;
+          modalToggle.onclick = () => {
+            _modalInMp4 = !_modalInMp4;
+            if (_modalInMp4) {
+              modalFrame.style.display = 'none';
+              modalPrev.style.display = 'none';
+              modalNext.style.display = 'none';
+              modalVideo.src = c.mp4Blob;
+              modalVideo.style.display = '';
+              modalVideo.play();
+              modalToggle.classList.add('active');
+              modalToggle.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Xem HTML`;
+              modalOpenNew.onclick = () => window.open(c.mp4Blob, '_blank');
+              modalDl.style.display = '';
+              modalDl.href = c.mp4Blob;
+              modalDl.download = c.mp4Name;
+            } else {
+              modalVideo.pause();
+              modalVideo.style.display = 'none';
+              modalFrame.src = htmlSrc;
+              modalFrame.style.display = '';
+              modalPrev.style.display = '';
+              modalNext.style.display = '';
+              modalToggle.classList.remove('active');
+              modalToggle.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="5 3 19 12 5 21 5 3"/></svg> Xem MP4`;
+              modalOpenNew.onclick = () => window.open(viewSrc, '_blank');
+              modalDl.style.display = 'none';
+            }
+          };
+          modalDl.style.display = 'none';
+        } else {
+          modalToggle.style.display = 'none';
+          modalDl.style.display = 'none';
+        }
+        modal.classList.add('open');
+      }
+
+      document.getElementById('modalClose').onclick = closeModal;
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal();
+      });
+      function closeModal() {
+        modal.classList.remove('open');
+        modalFrame.src = 'about:blank';
+        modalVideo.pause();
+        modalVideo.src = '';
+        modalVideo.style.display = 'none';
+        modalFrame.style.display = '';
+        _modalInMp4 = false;
+      }
+
+      refreshBtn.onclick = () => {
+        setPage(1, true);
+        scan();
+      };
+      searchInput.addEventListener('input', () => {
+        setPage(1, true);
+        render();
+      });
+      sortSelect.addEventListener('change', () => {
+        setPage(1, true);
+        render();
+      });
+      perPageSelect.addEventListener('change', () => {
+        LIMIT = perPageSelect.value;
+        setPage(1, true);
+        render();
+      });
+    </script>
+  </body>
+</html>

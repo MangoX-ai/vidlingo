@@ -1,0 +1,13 @@
+# STT word-level cho apply_stt_timing — chạy local, cô lập trong .venv (PEP 668 safe).
+# Cài: python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+# (Windows: .venv\Scripts\pip install -r requirements.txt)
+faster-whisper==1.1.1
+# faster-whisper 1.1.1 import `requests` nhưng huggingface_hub mới không còn kéo nó về → pin tường minh.
+requests>=2.31
+
+# ─── GPU (tuỳ chọn) ──────────────────────────────────────────────────────────
+# Mặc định chạy CPU (int8). Muốn dùng NVIDIA GPU (WHISPER_DEVICE=cuda hoặc auto khi có GPU)
+# thì BỎ COMMENT 2 dòng dưới (CTranslate2 cần cuBLAS + cuDNN cho CUDA 12):
+#   nvidia-cublas-cu12
+#   nvidia-cudnn-cu12>=9.0
+# Nếu thiếu, transcribe.py tự fallback về CPU int8 — không vỡ pipeline.
