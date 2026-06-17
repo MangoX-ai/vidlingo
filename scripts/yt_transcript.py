@@ -80,6 +80,16 @@ def convert(path: str) -> dict:
                              "end": round(ev_end, 3)})
             text_parts.append(line)
 
+    # YouTube auto-caption là kiểu "rolling": dDurationMs là thời gian HIỂN THỊ của
+    # dòng (~4.5s), gối đầu lên 1–2 dòng kế tiếp → end của segment bị phồng, các câu
+    # chồng lấn nhau ~2s. Khi all-video.html phát từng câu (currentTime: start→end),
+    # audio lố sang câu sau → nghe "chậm/không khớp". Cắt gọn end về đúng start của
+    # câu kế tiếp để mỗi câu khít với lời nói.
+    for i in range(len(segments) - 1):
+        nxt_start = segments[i + 1]["start"]
+        if segments[i]["start"] < nxt_start < segments[i]["end"]:
+            segments[i]["end"] = nxt_start
+
     # end của mỗi từ = start của từ kế tiếp; từ cuối lấy end của segment chứa nó.
     for i, w in enumerate(words):
         if i + 1 < len(words):
