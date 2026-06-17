@@ -1,17 +1,15 @@
 #!/usr/bin/env python3
 """
-faster-whisper STT — word-level timestamps → JSON SCHEMA CHUNG ra stdout.
+faster-whisper STT — segment-level transcript → JSON SCHEMA CHUNG ra stdout.
 
-Dùng chung cho cả 3 provider (omnivoice/vbee/elevenlabs): apply_stt_timing chỉ
-cần word-timeline, nên 1 model local thay được hết.
+App (all-video.html) chỉ đọc `segments` + `duration`, nên không xuất word-level.
 
 Usage:
     python transcribe.py <audio_path> [--language vi] [--model small]
                          [--device cpu] [--compute int8]
 
 In ra stdout DUY NHẤT 1 dòng JSON:
-    {"text", "duration", "words":[{"word","start","end"}],
-     "segments":[{"text","start","end"}]}
+    {"text", "duration", "segments":[{"text","start","end"}]}
 
 Mọi log/diagnostic đi qua stderr để stdout sạch JSON cho Node parse.
 
@@ -104,11 +102,10 @@ def transcribe_file(model, path: str, lang, offset: float = 0.0) -> dict:
     segments, info = model.transcribe(
         path,
         language=lang,
-        word_timestamps=True,
+        word_timestamps=False,
         vad_filter=False,
     )
 
-    words = []
     segs = []
     text_parts = []
     for seg in segments:
@@ -120,38 +117,25 @@ def transcribe_file(model, path: str, lang, offset: float = 0.0) -> dict:
                 "start": round(float(seg.start) + offset, 3),
                 "end":   round(float(seg.end)   + offset, 3),
             })
-        for w in (seg.words or []):
-            tok = (w.word or "").strip()
-            if not tok:
-                continue
-            words.append({
-                "word":  tok,
-                "start": round(float(w.start) + offset, 3),
-                "end":   round(float(w.end)   + offset, 3),
-            })
 
     return {
         "text":     " ".join(text_parts).strip(),
         "duration": round(float(getattr(info, "duration", 0.0) or 0.0), 3),
-        "words":    words,
         "segments": segs,
     }
 
 
 def merge_results(parts: list[dict], total_duration: float, source: str) -> dict:
     """Ghép nhiều kết quả part thành 1 output cuối."""
-    all_words = []
     all_segs  = []
     all_text  = []
     for p in parts:
-        all_words.extend(p["words"])
         all_segs.extend(p["segments"])
         if p["text"]:
             all_text.append(p["text"])
     return {
         "text":     " ".join(all_text).strip(),
         "duration": round(total_duration, 3),
-        "words":    all_words,
         "segments": all_segs,
         "source":   source,
     }
@@ -232,7 +216,7 @@ def main():
                     part_result = transcribe_file(model, part_path, lang, offset=offset)
                     log(
                         f"[faster-whisper] part offset={offset:.1f}s: "
-                        f"{len(part_result['words'])} từ, {len(part_result['segments'])} câu"
+                        f"{len(part_result['segments'])} câu"
                     )
                     result_parts.append(part_result)
 
@@ -248,8 +232,7 @@ def main():
     sys.stdout.write(json.dumps(result, ensure_ascii=False))
     sys.stdout.flush()
     log(
-        f"[faster-whisper] xong: {len(result['words'])} từ word-level, "
-        f"{len(result['segments'])} câu, {result['duration']}s"
+        f"[faster-whisper] xong: {len(result['segments'])} câu, {result['duration']}s"
     )
 
 
