@@ -9,7 +9,7 @@ Usage:
     python yt_transcript.py <file.json3>
 
 In ra stdout DUY NHẤT 1 dòng JSON:
-    {"text", "duration", "words":[{"word","start","end"}],
+    {"text", "duration",
      "segments":[{"text","start","end"}], "source":"youtube:json3"}
 
 Mọi log đi qua stderr để stdout sạch JSON cho Node parse.
@@ -41,9 +41,9 @@ def convert(path: str) -> dict:
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
 
-    words = []
     segments = []
     text_parts = []
+    word_count = 0
 
     for ev in data.get("events", []):
         segs = ev.get("segs") or []
@@ -69,10 +69,8 @@ def convert(path: str) -> dict:
 
         line_tokens = []
         for m in re.finditer(r"\S+", full):
-            tok = m.group()
-            line_tokens.append(tok)
-            words.append({"word": tok,
-                          "start": round(offs[m.start()] / 1000.0, 3)})
+            line_tokens.append(m.group())
+            word_count += 1
 
         line = " ".join(line_tokens).strip()
         if line:
@@ -80,32 +78,22 @@ def convert(path: str) -> dict:
                              "end": round(ev_end, 3)})
             text_parts.append(line)
 
-    # YouTube auto-caption là kiểu "rolling": dDurationMs là thời gian HIỂN THỊ của
-    # dòng (~4.5s), gối đầu lên 1–2 dòng kế tiếp → end của segment bị phồng, các câu
-    # chồng lấn nhau ~2s. Khi all-video.html phát từng câu (currentTime: start→end),
-    # audio lố sang câu sau → nghe "chậm/không khớp". Cắt gọn end về đúng start của
-    # câu kế tiếp để mỗi câu khít với lời nói.
+    # YouTube "rolling caption": dDurationMs là thời gian câu NẰM TRÊN MÀN HÌNH
+    # (giữ lại trong lúc câu sau đã chạy) → các event chồng lấn ~2s. Nếu để nguyên
+    # end = tStart+dDuration thì mỗi câu bị kéo dài đè sang câu kế, lệch nhịp nói.
+    # Cắt end về start của câu kế tiếp khi bị chồng — vẫn giữ khoảng lặng tự nhiên.
     for i in range(len(segments) - 1):
-        nxt_start = segments[i + 1]["start"]
-        if segments[i]["start"] < nxt_start < segments[i]["end"]:
-            segments[i]["end"] = nxt_start
-
-    # end của mỗi từ = start của từ kế tiếp; từ cuối lấy end của segment chứa nó.
-    for i, w in enumerate(words):
-        if i + 1 < len(words):
-            w["end"] = words[i + 1]["start"]
-        else:
-            w["end"] = max((seg["end"] for seg in segments), default=w["start"])
-        if w["end"] < w["start"]:
-            w["end"] = w["start"]
+        nxt = segments[i + 1]["start"]
+        if segments[i]["end"] > nxt:
+            segments[i]["end"] = nxt
 
     duration = max((seg["end"] for seg in segments), default=0.0)
     return {
         "text": " ".join(text_parts).strip(),
         "duration": round(duration, 3),
-        "words": words,
         "segments": segments,
         "source": "youtube:json3",
+        "_word_count": word_count,
     }
 
 
@@ -114,7 +102,7 @@ def main():
         sys.stderr.write("Usage: python yt_transcript.py <file.json3>\n")
         sys.exit(2)
     result = convert(sys.argv[1])
-    if not result["words"]:
+    if not result.pop("_word_count", 0):
         sys.stderr.write("⚠️  json3 không có từ nào sau khi lọc — coi như không dùng được.\n")
         sys.exit(3)
     sys.stdout.write(json.dumps(result, ensure_ascii=False))

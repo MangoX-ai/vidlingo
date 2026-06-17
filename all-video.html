@@ -1262,15 +1262,26 @@
       .dm-btn.on { background: rgba(196,18,48,.1); color: #c41230; border-color: #c41230; }
       .dm-btn-sz { padding: 0 7px; min-width: 28px; font-weight: 700; }
 
-      .dm-pbar { height: 3px; background: #f0d8dc; flex-shrink: 0; }
-      .dm-pbar-fill { height: 100%; background: #c41230; transition: width .35s; }
 
       /* ── Video area (top, full-width) ── */
       .dm-video-area {
         width: 100%; height: 42vh; flex-shrink: 0;
-        background: #000; overflow: hidden;
+        background: #000; overflow: hidden; position: relative;
       }
-      #dmPlayer { width: 100%; height: 100%; object-fit: contain; display: block; }
+      #dmVideoEl { width: 100%; height: 100%; object-fit: contain; display: block; }
+      #dmYtWrap { position: absolute; inset: 0; display: none; }
+      #dmYtWrap iframe { width: 100%; height: 100%; border: 0; display: block; }
+      /* Lớp phủ: đang phát → trong suốt (chỉ chặn hover để giấu title/share của YouTube);
+         tạm dừng → đen kín che toàn bộ branding paused (nút play to, "Video khác", logo). */
+      #dmYtWrap .dm-yt-cover { position: absolute; inset: 0; z-index: 2; cursor: pointer; background: transparent; transition: background .12s; }
+      #dmYtWrap .dm-yt-cover.paused { background: #000; }
+      /* Nút play tam giác của app — chỉ hiện khi tạm dừng */
+      #dmYtWrap .dm-yt-cover.paused::after {
+        content: ''; position: absolute; top: 50%; left: 50%;
+        transform: translate(-40%, -50%);
+        border-left: 28px solid rgba(255,255,255,.92);
+        border-top: 18px solid transparent; border-bottom: 18px solid transparent;
+      }
 
       /* ── Custom media controls bar ── */
       .dm-controls {
@@ -1411,7 +1422,7 @@
       }
       .dm-trans.hide { opacity: 0; pointer-events: none; }
 
-      .dm-tags { display: flex; flex-wrap: wrap; gap: 6px; min-height: 22px; }
+      .dm-tags { display: none; flex-wrap: wrap; gap: 6px; min-height: 22px; }
       .dm-tag {
         display: inline-flex; align-items: center; gap: 4px;
         height: 22px; padding: 0 9px; border-radius: 20px;
@@ -1827,7 +1838,8 @@
 
       <!-- Video (top, full-width) -->
       <div class="dm-video-area">
-        <video id="dmPlayer" preload="auto"></video>
+        <video id="dmVideoEl" preload="auto"></video>
+        <div id="dmYtWrap"></div>
       </div>
 
       <!-- Custom media controls -->
@@ -1893,12 +1905,9 @@
           <button class="dm-btn on" id="dmBtnTPanel">Transcript</button>
           <button class="dm-btn" id="dmBtnTrans">Ẩn dịch</button>
           <button class="dm-btn" id="dmTabQ" style="display:none">🎧 Câu hỏi nghe</button>
-          <button class="dm-btn" id="dmClose">✕ Đóng</button>
         </div>
       </div>
 
-      <!-- Segment progress bar -->
-      <div class="dm-pbar"><div class="dm-pbar-fill" id="dmPbar" style="width:0%"></div></div>
 
       <!-- Main dictation area + transcript panel -->
       <div class="dm-content">
@@ -2402,8 +2411,59 @@
             if (hasIelts) {
               clip.hasIelts = true;
               clip._subDirHandle = sub; // dùng để load ielts_listening.json
+              try {
+                const ielF = await (await sub.getFileHandle('ielts_listening.json')).getFile();
+                const ielMeta = JSON.parse(await ielF.text());
+                if (ielMeta.title) clip.title = ielMeta.title;
+                if (ielMeta.youtube_id) clip.youtubeId = ielMeta.youtube_id;
+                if (ielMeta.created_at) {
+                  const t = new Date(ielMeta.created_at).getTime();
+                  if (!isNaN(t)) { clip.createdAt = t; clip.updatedAt = t; }
+                }
+              } catch {}
             }
             allClips.push(clip);
+            continue;
+          }
+
+          // Cấu trúc YouTube-only: KHÔNG có video.mp4 nhưng có ielts (youtube_id)
+          // và/hoặc parts/ → vẫn hiện & xem được, phát qua YouTube IFrame.
+          if (!hasHtml && (hasIelts || hasPartsDir)) {
+            const sub = await dirHandle.getDirectoryHandle(name);
+            const clip = { slug: name, hasHtml: false, hasMp4: false,
+                           title: name.replace(/_/g, ' ') };
+            let ytId = null;
+            if (hasIelts) {
+              clip.hasIelts = true;
+              clip._subDirHandle = sub;
+              try {
+                const ielF = await (await sub.getFileHandle('ielts_listening.json')).getFile();
+                const ielMeta = JSON.parse(await ielF.text());
+                if (ielMeta.title) clip.title = ielMeta.title;
+                if (ielMeta.youtube_id) ytId = ielMeta.youtube_id;
+                if (ielMeta.created_at) {
+                  const t = new Date(ielMeta.created_at).getTime();
+                  if (!isNaN(t)) { clip.createdAt = t; clip.updatedAt = t; }
+                }
+              } catch {}
+            }
+            if (ytId) clip.youtubeId = ytId;
+            if (hasPartsDir) {
+              clip.hasTranscript = true;
+              clip.partsSubDir = name;
+              clip._subDirHandle = sub;
+            }
+            // thumbnail: ưu tiên thumb.jpg local, không có thì lấy thumbnail YouTube
+            try {
+              if (thumbName) {
+                const f = await (await sub.getFileHandle(thumbName)).getFile();
+                clip.thumbUrl = URL.createObjectURL(f);
+              } else if (ytId) {
+                clip.thumbUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+              }
+            } catch {}
+            // chỉ thêm nếu thực sự xem được (có YouTube hoặc có transcript)
+            if (clip.youtubeId || clip.hasTranscript) allClips.push(clip);
             continue;
           }
 
@@ -2540,7 +2600,7 @@
     <div class="card" onclick="openClip(${idx})" onmouseenter="previewOn(this)" onmouseleave="previewOff(this)">
       <div class="thumb-wrap">
         ${thumb}
-        <span class="badge ${c.hasMp4 ? 'badge-mp4' : 'badge-html'}">${c.hasMp4 ? 'MP4' : 'HTML'}</span>
+        <span class="badge ${c.hasMp4 ? 'badge-mp4' : 'badge-html'}">${c.hasMp4 ? 'MP4' : (c.youtubeId ? 'YT' : 'HTML')}</span>
       </div>
       <div class="card-body">
         <div class="card-title" title="${displayTitle}">${displayTitle}</div>
@@ -2686,13 +2746,138 @@
       let dmHintMode = 'none', dmAutoAdv = true, dmShowTrans = false;
       let dmFontSize = 18, dmStopFn = null, dmSegEnd = Infinity;
 
-      const dmPlayer   = document.getElementById('dmPlayer');
+      // ══ Media controller: bọc <video> native HOẶC YouTube IFrame player ══
+      // Phơi đúng tập API mà phần code dưới đang dùng (currentTime/duration/paused/
+      // playbackRate/src/play/pause/addEventListener) nên không phải sửa ~30 chỗ gọi.
+      // Native <video> phát file local (chính xác từng frame, chạy offline).
+      // YouTube IFrame phát qua mạng — currentTime lấy bằng polling ~120ms.
+      function makeMedia(videoEl, ytWrapEl) {
+        const bus = { timeupdate: [], play: [], pause: [], ended: [] };
+        function emit(ev) { (bus[ev] || []).forEach(fn => { try { fn(); } catch (e) {} }); }
+        let mode = 'video';      // 'video' | 'yt'
+        let yt = null;           // YT.Player
+        let ytReadyId = null;    // id chờ tạo player khi API chưa sẵn sàng
+        let poll = null;
+        let srcTag = '';
+
+        // Forward native events → bus (chỉ khi đang ở chế độ video)
+        ['timeupdate', 'play', 'pause', 'ended'].forEach(ev =>
+          videoEl.addEventListener(ev, () => { if (mode === 'video') emit(ev); }));
+
+        function startPoll() {
+          stopPoll();
+          poll = setInterval(() => { if (mode === 'yt' && yt && yt.getCurrentTime) emit('timeupdate'); }, 120);
+        }
+        function stopPoll() { if (poll) { clearInterval(poll); poll = null; } }
+
+        // ── YouTube IFrame API: nạp script 1 lần, hàng đợi tạo player ──
+        function ensureYTApi(cb) {
+          if (window.YT && window.YT.Player) return cb();
+          const prev = window.onYouTubeIframeAPIReady;
+          window.onYouTubeIframeAPIReady = () => { prev && prev(); cb(); };
+          if (!document.getElementById('yt-iframe-api')) {
+            const s = document.createElement('script');
+            s.id = 'yt-iframe-api';
+            s.src = 'https://www.youtube.com/iframe_api';
+            document.head.appendChild(s);
+          }
+        }
+
+        function loadYT(id) {
+          mode = 'yt';
+          srcTag = 'yt:' + id;
+          try { videoEl.pause(); } catch (e) {}
+          videoEl.removeAttribute('src'); try { videoEl.load(); } catch (e) {}
+          videoEl.style.display = 'none';
+          ytWrapEl.style.display = 'block';
+          if (yt && yt.loadVideoById) { yt.loadVideoById(id); startPoll(); return; }
+          ytReadyId = id;
+          // Tự dựng iframe Y HỆT mã nhúng chính thức của YouTube — quan trọng nhất là
+          // referrerpolicy="strict-origin-when-cross-origin" (thiếu nó, video báo chí/VTV
+          // báo "Video unavailable"). Thêm enablejsapi=1 để IFrame API GẮN vào iframe có
+          // sẵn (thay vì tự dựng div → iframe thiếu referrerpolicy).
+          const httpOrigin = /^https?:$/.test(location.protocol) ? location.origin : undefined;
+          // controls:'0' → ẩn thanh điều khiển native của YouTube (app đã có dm-controls riêng)
+          const qs = new URLSearchParams({ enablejsapi: '1', rel: '0', modestbranding: '1', playsinline: '1', controls: '0' });
+          if (httpOrigin) qs.set('origin', httpOrigin);
+          const ifr = document.createElement('iframe');
+          ifr.id = 'dmYtMount';
+          ifr.src = `https://www.youtube.com/embed/${id}?${qs.toString()}`;
+          ifr.title = 'YouTube video player';
+          ifr.setAttribute('frameborder', '0');
+          ifr.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+          ifr.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+          ifr.setAttribute('allowfullscreen', '');
+          ytWrapEl.innerHTML = '';
+          ytWrapEl.appendChild(ifr);
+          // Lớp phủ trong suốt: chặn chuột "chạm" iframe → YouTube không bung thanh
+          // title/share ở trên khi rê chuột. Click vào lớp = play/pause (như nút native).
+          const cover = document.createElement('div');
+          cover.className = 'dm-yt-cover paused';   // bắt đầu ở trạng thái che (chưa phát)
+          cover.addEventListener('click', () => {
+            if (!yt || !yt.getPlayerState) return;
+            if (yt.getPlayerState() === 1) yt.pauseVideo(); else yt.playVideo();
+          });
+          ytWrapEl.appendChild(cover);
+          ensureYTApi(() => {
+            if (ytReadyId !== id) return;
+            yt = new YT.Player(ifr, {
+              events: {
+                onStateChange: e => {
+                  if (e.data === YT.PlayerState.PLAYING) { emit('play'); cover.classList.remove('paused'); }
+                  else if (e.data === YT.PlayerState.PAUSED) { emit('pause'); cover.classList.add('paused'); }
+                  else if (e.data === YT.PlayerState.ENDED) { emit('pause'); emit('ended'); cover.classList.add('paused'); }
+                },
+              },
+            });
+            startPoll();
+          });
+        }
+
+        function loadVid(src) {
+          mode = 'video';
+          srcTag = src || '';
+          stopPoll();
+          ytReadyId = null;
+          ytWrapEl.style.display = 'none';
+          videoEl.style.display = 'block';
+          videoEl.src = src;
+        }
+
+        return {
+          el: videoEl,
+          get isYT() { return mode === 'yt'; },
+          get currentTime() { return mode === 'yt' ? (yt && yt.getCurrentTime ? yt.getCurrentTime() : 0) : videoEl.currentTime; },
+          set currentTime(t) { if (mode === 'yt') { if (yt && yt.seekTo) yt.seekTo(t, true); } else videoEl.currentTime = t; },
+          get duration() { return mode === 'yt' ? (yt && yt.getDuration ? yt.getDuration() : 0) : videoEl.duration; },
+          get paused() { return mode === 'yt' ? (!yt || !yt.getPlayerState || yt.getPlayerState() !== 1) : videoEl.paused; },
+          get playbackRate() { return mode === 'yt' ? (yt && yt.getPlaybackRate ? yt.getPlaybackRate() : 1) : videoEl.playbackRate; },
+          set playbackRate(r) { if (mode === 'yt') { if (yt && yt.setPlaybackRate) yt.setPlaybackRate(r); } else videoEl.playbackRate = r; },
+          get volume() { return mode === 'yt' ? (yt && yt.getVolume ? yt.getVolume() / 100 : 1) : videoEl.volume; },
+          set volume(v) { if (mode === 'yt') { if (yt && yt.setVolume) yt.setVolume(v * 100); } else videoEl.volume = v; },
+          get src() { return srcTag; },
+          play() { if (mode === 'yt') { if (yt && yt.playVideo) yt.playVideo(); return Promise.resolve(); } return videoEl.play(); },
+          pause() { if (mode === 'yt') { if (yt && yt.pauseVideo) yt.pauseVideo(); } else videoEl.pause(); },
+          addEventListener(ev, fn) { (bus[ev] || (bus[ev] = [])).push(fn); },
+          removeEventListener(ev, fn) { const a = bus[ev]; if (a) { const i = a.indexOf(fn); if (i >= 0) a.splice(i, 1); } },
+          loadVideo(src) { loadVid(src); },
+          loadYouTube(id) { loadYT(id); },
+          clear() {
+            stopPoll(); ytReadyId = null; srcTag = '';
+            if (mode === 'yt') { try { yt && yt.stopVideo && yt.stopVideo(); } catch (e) {} }
+            else { try { videoEl.pause(); } catch (e) {} videoEl.src = ''; }
+          },
+        };
+      }
+
+      const dmVideoEl  = document.getElementById('dmVideoEl');
+      const dmYtWrap   = document.getElementById('dmYtWrap');
+      const dmPlayer   = makeMedia(dmVideoEl, dmYtWrap);
       const dmModal    = document.getElementById('dictModal');
       const dmInput    = document.getElementById('dmInput');
       const dmIdx      = document.getElementById('dmIdx');
       const dmWords    = document.getElementById('dmWords');
       const dmMatch    = document.getElementById('dmMatch');
-      const dmPbar     = document.getElementById('dmPbar');
       const dmTags     = document.getElementById('dmTags');
       const dmGrid     = document.getElementById('dmGrid');
       const dmTrans    = document.getElementById('dmTrans');
@@ -2842,7 +3027,10 @@
 
           dmClipSlug = c.slug || '';
           dmCompleted = new Set(JSON.parse(localStorage.getItem('dm_done_' + dmClipSlug) || '[]'));
-          dmPlayer.src = c.mp4Url || c.mp4Blob;
+          // Có youtube_id → phát qua YouTube IFrame (không cần file local).
+          // Ngược lại dùng <video> native với mp4 local/URL.
+          if (c.youtubeId) dmPlayer.loadYouTube(c.youtubeId);
+          else dmPlayer.loadVideo(c.mp4Url || c.mp4Blob);
           dmModal.classList.add('open');
           dmBuildTPanel();
           // Desktop: show panel; Mobile: start hidden (slide-up on demand)
@@ -2867,7 +3055,7 @@
         document.getElementById('dmTPanel').classList.remove('tp-open');
         document.getElementById('dmTpBackdrop').classList.remove('open');
         dmPlayer.pause();
-        dmPlayer.src = '';
+        dmPlayer.clear();
         dmInput.value = '';
         dmSeekFill.style.width = '0%';
         dmTimeEl.textContent = '0:00 / 0:00';
@@ -2895,6 +3083,13 @@
           .replace(/\b(a|an|the)\b/g, ' ')
           .replace(/\s+/g, ' ').trim();
       }
+      // Mốc bắt đầu đoạn nghe: ưu tiên field `start`, fallback `time` (JSON cũ).
+      function iqStartOf(q) {
+        if (q && typeof q.start === 'number') return q.start;
+        if (q && typeof q.time === 'number') return q.time;
+        return undefined;
+      }
+
       function iqAnswerOk(input, answer) {
         const a = iqNorm(input);
         if (!a) return false;
@@ -2948,8 +3143,9 @@
                  <button class="iq-check">Kiểm tra</button>
                </div>`;
           const limit = q.word_limit ? `<div class="iq-limit">✎ ${iqEsc(q.word_limit)}</div>` : '';
-          const listen = (typeof q.time === 'number' && isFinite(q.time))
-            ? `<button class="iq-listen" data-t="${q.time}">▶ nghe</button>` : '';
+          const qStart = iqStartOf(q);
+          const listen = (typeof qStart === 'number' && isFinite(qStart))
+            ? `<button class="iq-listen" data-t="${qStart}">▶ nghe</button>` : '';
           return `<div class="iq-card" data-qi="${qi}">
             <div class="iq-q-top">
               <span class="iq-num">${q.no != null ? q.no : qi + 1}.</span>
@@ -2986,11 +3182,37 @@
           inp.addEventListener('keydown', e => {
             if (e.key === 'Enter') { e.preventDefault(); doFill(inp.closest('.iq-card')); }
           }));
+        // Quản lý điểm dừng cuối đoạn: mỗi lần bấm "nghe" sẽ huỷ mốc cũ, đặt mốc mới.
+        let iqStopFn = null;
+        function iqClearStop() {
+          if (iqStopFn) { player.removeEventListener('timeupdate', iqStopFn); iqStopFn = null; }
+        }
         listEl.querySelectorAll('.iq-listen').forEach(btn =>
           btn.addEventListener('click', () => {
             if (!player || !player.src) return;
-            if (onSeek) onSeek();
-            player.currentTime = +btn.dataset.t || 0;
+            if (onSeek) onSeek();          // bỏ mốc dừng của dictation
+            iqClearStop();                 // bỏ mốc dừng của lần nghe trước
+            const start = +btn.dataset.t || 0;
+            const qi = +btn.closest('.iq-card').dataset.qi;
+            // điểm dừng: ưu tiên q.end (mốc kết thúc câu nói thật trong transcript);
+            // nếu JSON cũ không có end → fallback dùng time của câu kế tiếp; cuối cùng nghe tới hết.
+            let stopAt = Infinity;
+            const qend = qs[qi] && qs[qi].end;
+            if (typeof qend === 'number' && isFinite(qend) && qend > start) {
+              stopAt = qend;
+            } else {
+              for (let j = qi + 1; j < qs.length; j++) {
+                const t = iqStartOf(qs[j]);
+                if (typeof t === 'number' && isFinite(t) && t > start) { stopAt = t; break; }
+              }
+            }
+            player.currentTime = start;
+            if (isFinite(stopAt)) {
+              iqStopFn = () => {
+                if (player.currentTime >= stopAt - 0.05) { player.pause(); iqClearStop(); }
+              };
+              player.addEventListener('timeupdate', iqStopFn);
+            }
             player.play().catch(() => {});
           }));
         updateScore();
@@ -3117,10 +3339,22 @@
           const item = document.createElement('div');
           item.className = 'dm-tp-item' + (dmCompleted.has(i) ? ' done' : '');
           item.innerHTML = `<div class="dm-tp-num">#${i + 1} · ${dmFmtTime(seg.start)}</div><div class="dm-tp-text">${seg.text}</div>`;
-          item.addEventListener('click', () => dmLoadSeg(i));
+          item.addEventListener('click', () => { dmTpHold = 0; dmLoadSeg(i); });
           panel.appendChild(item);
         });
       }
+
+      // Khi người dùng tự cuộn transcript → tạm ngừng auto-scroll bám segment.
+      // Dùng wheel/touchmove (cử chỉ thật của user) nên KHÔNG bị scrollIntoView tự kích hoạt.
+      let dmTpHold = 0;
+      const DM_TP_HOLD_MS = 4000;
+      (function () {
+        const panel = document.getElementById('dmTPanel');
+        if (!panel) return;
+        const mark = () => { dmTpHold = performance.now(); };
+        panel.addEventListener('wheel', mark, { passive: true });
+        panel.addEventListener('touchmove', mark, { passive: true });
+      })();
 
       function dmSyncTPanel(idx) {
         const panel = document.getElementById('dmTPanel');
@@ -3128,7 +3362,10 @@
           el.classList.toggle('active', i === idx);
         });
         const active = panel.querySelector('.dm-tp-item.active');
-        if (active) active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        // Bỏ qua auto-scroll nếu user vừa tự cuộn trong DM_TP_HOLD_MS gần đây
+        if (active && performance.now() - dmTpHold > DM_TP_HOLD_MS) {
+          active.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
       }
 
       function dmUpdateSegUI(idx) {
@@ -3141,7 +3378,6 @@
           document.getElementById('dmBtnBoth').classList.toggle('on', dmHintMode === 'both');
         }
         dmIdx.textContent = `#${idx + 1}`;
-        dmPbar.style.width = `${((idx + 1) / dmSegs.length) * 100}%`;
         document.getElementById('dmBtnPrev').disabled = idx === 0;
         document.getElementById('dmBtnNext').disabled = idx === dmSegs.length - 1;
         dmTrans.textContent = seg.text;
@@ -3352,7 +3588,6 @@
       function dmRevealOne() { const n = dmGrid.querySelector('.dm-chip[data-r="0"]'); if (n) dmRevealChip(n); }
 
       // Button wiring
-      document.getElementById('dmClose').addEventListener('click', dmClose);
       document.getElementById('dmHome').addEventListener('click', dmClose);
       document.getElementById('dmBtnNext').addEventListener('click', () => dmLoadSeg(dmCur + 1));
       document.getElementById('dmBtnPrev').addEventListener('click', () => dmLoadSeg(dmCur - 1));
