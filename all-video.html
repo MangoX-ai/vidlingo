@@ -424,7 +424,7 @@
       }
 
       .thumb-wrap {
-        aspect-ratio: 9/16;
+        aspect-ratio: 16/9;
         background: var(--bg);
         position: relative;
         overflow: hidden;
@@ -1084,6 +1084,105 @@
       }
 
       /* ══════════════════════════════════════════════════════
+         Câu hỏi nghe (Listening) — style danh sách câu hỏi & chấm điểm
+         ══════════════════════════════════════════════════════ */
+      .iq-backdrop {
+        display: none; position: fixed; inset: 0; z-index: 210;
+        background: rgba(20,4,8,.55); backdrop-filter: blur(3px);
+        align-items: flex-start; justify-content: center; overflow-y: auto;
+        padding: 24px 12px;
+      }
+      .iq-backdrop.open { display: flex; }
+      .iq-sheet {
+        width: 100%; max-width: 760px; background: #fff; border-radius: 16px;
+        box-shadow: 0 24px 60px rgba(0,0,0,.3); overflow: hidden;
+        margin: auto; display: flex; flex-direction: column;
+      }
+      .iq-head {
+        position: sticky; top: 0; z-index: 2;
+        display: flex; align-items: center; gap: 12px;
+        padding: 14px 18px; background: linear-gradient(135deg,#c41230,#e8364f);
+        color: #fff;
+      }
+      .iq-head h2 { font-size: 15px; font-weight: 800; margin: 0; flex: 1;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .iq-score {
+        font-size: 13px; font-weight: 800; background: rgba(255,255,255,.18);
+        padding: 4px 12px; border-radius: 999px; white-space: nowrap;
+      }
+      .iq-close {
+        border: 0; background: rgba(255,255,255,.18); color: #fff; cursor: pointer;
+        width: 30px; height: 30px; border-radius: 8px; font-size: 16px; font-weight: 700;
+      }
+      .iq-close:hover { background: rgba(255,255,255,.32); }
+      .iq-video-wrap { background: #000; }
+      .iq-video-wrap video { width: 100%; max-height: 300px; display: block; }
+      .iq-body { padding: 16px 18px 22px; }
+      .iq-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+      .iq-act-btn {
+        border: 1px solid #c41230; background: #c41230; color: #fff; cursor: pointer;
+        font-size: 13px; font-weight: 700; padding: 9px 18px; border-radius: 9px;
+      }
+      .iq-act-btn.ghost { background: #fff; color: #c41230; }
+      .iq-act-btn:hover { filter: brightness(1.05); }
+
+      .iq-card {
+        border: 1px solid #f0d8dc; border-radius: 12px; padding: 14px 16px;
+        margin-bottom: 14px; background: #fffafb;
+      }
+      .iq-card.correct { border-color: #16a34a; background: #f0fdf4; }
+      .iq-card.wrong   { border-color: #dc2626; background: #fef2f2; }
+      .iq-q-top { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+      .iq-num {
+        font-weight: 800; color: #c41230; font-size: 14px; flex-shrink: 0;
+        min-width: 26px;
+      }
+      .iq-type {
+        font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+        color: #9a6070; background: rgba(196,18,48,.08); padding: 2px 7px; border-radius: 5px;
+      }
+      .iq-listen {
+        margin-left: auto; border: 1px solid #f0d8dc; background: #fff; color: #c41230;
+        cursor: pointer; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 6px;
+        display: inline-flex; align-items: center; gap: 4px;
+      }
+      .iq-listen:hover { background: #fff0f3; }
+      .iq-qtext { font-size: 14px; color: #1a0508; line-height: 1.5; margin: 6px 0 4px; }
+      .iq-limit { font-size: 11px; font-style: italic; color: #c41230; margin-bottom: 8px; }
+      .iq-opts { display: flex; flex-direction: column; gap: 7px; margin-top: 8px; }
+      .iq-opt {
+        text-align: left; border: 1px solid #e6cfd5; background: #fff; cursor: pointer;
+        font-size: 13px; color: #333; padding: 9px 12px; border-radius: 9px; transition: all .12s;
+      }
+      .iq-opt:hover:not(:disabled) { border-color: #c41230; background: #fff0f3; }
+      .iq-opt:disabled { cursor: default; }
+      .iq-opt.picked-correct { border-color: #16a34a; background: #dcfce7; color: #15803d; font-weight: 700; }
+      .iq-opt.picked-wrong   { border-color: #dc2626; background: #fee2e2; color: #b91c1c; font-weight: 700; }
+      .iq-opt.reveal-correct { border-color: #16a34a; background: #f0fdf4; color: #15803d; font-weight: 700; }
+      .iq-fill-row { display: flex; gap: 8px; margin-top: 8px; }
+      .iq-fill {
+        flex: 1; border: 1px solid #e6cfd5; border-radius: 9px; padding: 9px 12px;
+        font-size: 14px; outline: none;
+      }
+      .iq-fill:focus { border-color: #c41230; box-shadow: 0 0 0 3px rgba(196,18,48,.12); }
+      .iq-fill:disabled { background: #f7eef0; }
+      .iq-check {
+        border: 1px solid #c41230; background: #c41230; color: #fff; cursor: pointer;
+        font-size: 13px; font-weight: 700; padding: 0 16px; border-radius: 9px;
+      }
+      .iq-check:disabled { opacity: .5; cursor: default; }
+      .iq-feedback { margin-top: 9px; font-size: 12.5px; line-height: 1.5; display: none; }
+      .iq-feedback.show { display: block; }
+      .iq-feedback .ok  { color: #15803d; font-weight: 700; }
+      .iq-feedback .no  { color: #b91c1c; font-weight: 700; }
+      .iq-feedback .ans { color: #1a0508; font-weight: 700; }
+      .iq-feedback .ex  { color: #6a3040; font-style: italic; }
+      @media (max-width: 600px) {
+        .iq-backdrop { padding: 0; }
+        .iq-sheet { max-width: 100%; min-height: 100%; border-radius: 0; }
+      }
+
+      /* ══════════════════════════════════════════════════════
          Dictation Modal
          ══════════════════════════════════════════════════════ */
       .dm-backdrop {
@@ -1095,6 +1194,24 @@
       }
       .dm-backdrop.open { display: flex; }
 
+      /* Tab "Câu hỏi nghe" — thay chỗ vùng luyện khi bật, để không cướp phím tắt */
+      .dm-qpanel {
+        display: none; flex: 1; min-width: 0; overflow-y: auto;
+        padding: 16px 20px 28px; flex-direction: column;
+      }
+      .dm-content.qmode .dm-main   { display: none; }
+      .dm-content.qmode .dm-tpanel { display: none; }
+      .dm-content.qmode .dm-qpanel { display: flex; }
+      .dm-qp-head { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; max-width: 860px; }
+      .dm-qp-head h3 { font-size: 16px; font-weight: 800; color: #0e7490; margin: 0; flex: 1; }
+      .dm-qp-score {
+        font-size: 13px; font-weight: 800; color: #fff; background: #0e7490;
+        padding: 4px 12px; border-radius: 999px; white-space: nowrap;
+      }
+      .dm-qp-hint { font-size: 12px; color: #9a6070; margin: 0 0 14px; line-height: 1.5; max-width: 860px; }
+      .dm-qpanel #dmQList, .dm-qpanel .iq-actions { max-width: 860px; width: 100%; }
+      .dm-btn.tab-on { background: #0e7490; border-color: #0e7490; color: #fff; }
+
       .dm-topbar {
         height: 48px; flex-shrink: 0;
         display: flex; align-items: center; gap: 9px;
@@ -1103,6 +1220,14 @@
         border-bottom: 1px solid #f0d8dc;
         overflow: hidden;
       }
+      .dm-home-btn {
+        height: 30px; padding: 0 12px 0 9px; flex-shrink: 0;
+        display: flex; align-items: center; gap: 5px;
+        background: #c41230; border: 1px solid #c41230; border-radius: 7px;
+        font-family: inherit; font-size: 12px; font-weight: 700; color: #fff;
+        cursor: pointer; white-space: nowrap; transition: all .15s;
+      }
+      .dm-home-btn:hover { background: #a30f28; border-color: #a30f28; }
       .dm-idx {
         font-size: 12px; font-weight: 700; color: #c41230;
         background: rgba(196,18,48,.1); padding: 2px 9px; border-radius: 20px; flex-shrink: 0;
@@ -1741,6 +1866,10 @@
 
       <!-- Info / stats bar -->
       <div class="dm-topbar">
+        <button class="dm-home-btn" id="dmHome" title="Quay lại Home">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9"/></svg>
+          Quay lại Home
+        </button>
         <span class="dm-idx" id="dmIdx">#1</span>
         <div class="dm-prog">
           <span id="dmWords">0/0 từ</span>
@@ -1763,6 +1892,7 @@
           <button class="dm-btn on" id="dmBtnAuto">→ Tự động</button>
           <button class="dm-btn on" id="dmBtnTPanel">Transcript</button>
           <button class="dm-btn" id="dmBtnTrans">Ẩn dịch</button>
+          <button class="dm-btn" id="dmTabQ" style="display:none">🎧 Câu hỏi nghe</button>
           <button class="dm-btn" id="dmClose">✕ Đóng</button>
         </div>
       </div>
@@ -1805,6 +1935,20 @@
         <div class="dm-tp-header">
           <span class="dm-tp-title">Transcript</span>
           <button class="dm-tp-close" id="dmTpClose" aria-label="Đóng">✕</button>
+        </div>
+      </div>
+
+      <!-- Tab "Câu hỏi nghe" (thay vùng luyện khi bật; phím tắt dictation tắt) -->
+      <div class="dm-qpanel" id="dmQPanel">
+        <div class="dm-qp-head">
+          <h3>🎧 Câu hỏi nghe</h3>
+          <span class="dm-qp-score" id="dmQScore">0 / 0</span>
+        </div>
+        <p class="dm-qp-hint">Bấm “▶ nghe” ở mỗi câu để tới đúng đoạn trong video. Chọn / điền đáp án sẽ được chấm ngay.</p>
+        <div id="dmQList"></div>
+        <div class="iq-actions">
+          <button class="iq-act-btn ghost" id="dmQRevealAll">Hiện hết đáp án</button>
+          <button class="iq-act-btn" id="dmQReset">Làm lại</button>
         </div>
       </div>
 
@@ -2221,7 +2365,7 @@
 
         // Pass 2b: subdirs — hỗ trợ cả cấu trúc mới (video.mp4) lẫn cũ (index.html)
         for (const { name, entry } of subDirs) {
-          let hasHtml = false, hasVideoMp4 = false, thumbName = null, hasPartsDir = false;
+          let hasHtml = false, hasVideoMp4 = false, thumbName = null, hasPartsDir = false, hasIelts = false;
           const mp4Files = [];
           for await (const [fname, fentry] of entry.entries()) {
             if (fname === 'index.html') hasHtml = true;
@@ -2230,6 +2374,7 @@
             if (fname.toLowerCase().endsWith('.mp4')) mp4Files.push(fname);
             if (fname.match(/-(thumbnail)\.(jpg|png|webp)$/i)) thumbName = fname;
             if (fname === 'parts' && fentry.kind === 'directory') hasPartsDir = true;
+            if (fname === 'ielts_listening.json') hasIelts = true;
           }
 
           // Cấu trúc mới: output/<slug>/video.mp4
@@ -2253,6 +2398,10 @@
               clip.hasTranscript = true;
               clip.partsSubDir = name; // dùng để load transcript khi luyện dictation
               clip._subDirHandle = sub;
+            }
+            if (hasIelts) {
+              clip.hasIelts = true;
+              clip._subDirHandle = sub; // dùng để load ielts_listening.json
             }
             allClips.push(clip);
             continue;
@@ -2520,8 +2669,12 @@
         }
       }
 
-      // Click card → mở modal xem clip ngay tại chỗ (như trước).
+      // Click card / nút "Xem" → mở trang detail (Luyện + Câu hỏi nghe),
+      // KHÔNG mở modal slide nữa. Clip không có transcript thì openDictation tự bỏ qua.
       function openClip(i) {
+        const c = filtered()[i];
+        if (c && c.hasTranscript) { openDictation(i); return; }
+        // Không có transcript → không có bài luyện/câu hỏi: phát clip như cũ.
         openModal(i);
       }
 
@@ -2703,6 +2856,8 @@
             dmToggleTPanel(true);
           }
           dmLoadSeg(0);
+          dmModal.scrollTop = 0;
+          dmSetupIelts(c);
           setTimeout(() => dmInput.focus(), 80);
         } catch (e) { console.error('openDictation', e); }
       }
@@ -2719,6 +2874,202 @@
         dmBtnPP.innerHTML = DM_PLAY_ICO;
         if (dmStopFn) { dmPlayer.removeEventListener('timeupdate', dmStopFn); dmStopFn = null; }
       }
+
+      /* ══ Câu hỏi nghe (Listening) — render danh sách + chấm tức thì, dùng chung ══ */
+      const IQ_TYPE_LABEL = {
+        multiple_choice: 'Trắc nghiệm',
+        sentence_completion: 'Điền câu',
+        note_completion: 'Điền ghi chú',
+        short_answer: 'Trả lời ngắn',
+        matching: 'Nối',
+      };
+
+      function iqEsc(s) {
+        return String(s == null ? '' : s)
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      }
+      function iqNorm(s) {
+        return String(s == null ? '' : s).toLowerCase()
+          .replace(/[.,!?;:'"()\[\]/\\-]/g, ' ')
+          .replace(/\b(a|an|the)\b/g, ' ')
+          .replace(/\s+/g, ' ').trim();
+      }
+      function iqAnswerOk(input, answer) {
+        const a = iqNorm(input);
+        if (!a) return false;
+        // answer có thể có nhiều biến thể hợp lệ, ngăn cách bởi "/"
+        return String(answer).split('/').some(opt => iqNorm(opt) === a);
+      }
+
+      // Render danh sách câu hỏi vào 1 container bất kỳ; chấm tức thì bằng closure.
+      // opts: { listEl, scoreEl, player, data, onSeek }  → trả về { revealAll }
+      function renderIelts(opts) {
+        const { listEl, scoreEl, player, data, onSeek } = opts;
+        const qs = (data && data.questions) || [];
+        const state = {};   // state[qi] = 'correct' | 'wrong' | 'revealed'
+
+        function updateScore() {
+          if (!scoreEl) return;
+          const correct = Object.values(state).filter(v => v === 'correct').length;
+          const done = Object.keys(state).length;
+          scoreEl.textContent = `${correct} đúng / ${done} đã làm · ${qs.length} câu`;
+        }
+        function showFb(card, ok, q) {
+          const fb = card.querySelector('.iq-feedback');
+          const verdict = ok ? `<span class="ok">✓ Chính xác!</span>`
+                             : `<span class="no">✗ Chưa đúng.</span>`;
+          const ex = q.explanation ? `<br><span class="ex">${iqEsc(q.explanation)}</span>` : '';
+          fb.innerHTML = `${verdict} &nbsp; <span class="ans">Đáp án: ${iqEsc(q.answer)}</span>${ex}`;
+          fb.classList.add('show');
+          card.classList.add(ok ? 'correct' : 'wrong');
+        }
+        function doFill(card) {
+          const qi = +card.dataset.qi;
+          if (state[qi]) return;
+          const q = qs[qi];
+          const inp = card.querySelector('.iq-fill');
+          if (!inp.value.trim()) { inp.focus(); return; }
+          const ok = iqAnswerOk(inp.value, q.answer);
+          inp.disabled = true;
+          card.querySelector('.iq-check').disabled = true;
+          state[qi] = ok ? 'correct' : 'wrong';
+          showFb(card, ok, q);
+          updateScore();
+        }
+
+        listEl.innerHTML = qs.map((q, qi) => {
+          const isMC = q.type === 'multiple_choice' || q.type === 'matching';
+          const body = isMC
+            ? `<div class="iq-opts">${(q.options || []).map((o, oi) =>
+                `<button class="iq-opt" data-o="${oi}">${iqEsc(o)}</button>`).join('')}</div>`
+            : `<div class="iq-fill-row">
+                 <input class="iq-fill" type="text" placeholder="Nhập đáp án rồi nhấn Enter…">
+                 <button class="iq-check">Kiểm tra</button>
+               </div>`;
+          const limit = q.word_limit ? `<div class="iq-limit">✎ ${iqEsc(q.word_limit)}</div>` : '';
+          const listen = (typeof q.time === 'number' && isFinite(q.time))
+            ? `<button class="iq-listen" data-t="${q.time}">▶ nghe</button>` : '';
+          return `<div class="iq-card" data-qi="${qi}">
+            <div class="iq-q-top">
+              <span class="iq-num">${q.no != null ? q.no : qi + 1}.</span>
+              <span class="iq-type">${iqEsc(IQ_TYPE_LABEL[q.type] || q.type || '')}</span>
+              ${listen}
+            </div>
+            <div class="iq-qtext">${iqEsc(q.question || '')}</div>
+            ${limit}${body}
+            <div class="iq-feedback"></div>
+          </div>`;
+        }).join('');
+
+        listEl.querySelectorAll('.iq-opt').forEach(btn =>
+          btn.addEventListener('click', () => {
+            const card = btn.closest('.iq-card');
+            const qi = +card.dataset.qi;
+            if (state[qi]) return;
+            const q = qs[qi];
+            const oi = +btn.dataset.o;
+            const ok = iqNorm((q.options || [])[oi]) === iqNorm(q.answer);
+            card.querySelectorAll('.iq-opt').forEach(b => {
+              b.disabled = true;
+              const o = (q.options || [])[+b.dataset.o];
+              if (+b.dataset.o === oi) b.classList.add(ok ? 'picked-correct' : 'picked-wrong');
+              else if (iqNorm(o) === iqNorm(q.answer)) b.classList.add('reveal-correct');
+            });
+            state[qi] = ok ? 'correct' : 'wrong';
+            showFb(card, ok, q);
+            updateScore();
+          }));
+        listEl.querySelectorAll('.iq-check').forEach(btn =>
+          btn.addEventListener('click', () => doFill(btn.closest('.iq-card'))));
+        listEl.querySelectorAll('.iq-fill').forEach(inp =>
+          inp.addEventListener('keydown', e => {
+            if (e.key === 'Enter') { e.preventDefault(); doFill(inp.closest('.iq-card')); }
+          }));
+        listEl.querySelectorAll('.iq-listen').forEach(btn =>
+          btn.addEventListener('click', () => {
+            if (!player || !player.src) return;
+            if (onSeek) onSeek();
+            player.currentTime = +btn.dataset.t || 0;
+            player.play().catch(() => {});
+          }));
+        updateScore();
+
+        return {
+          revealAll() {
+            qs.forEach((q, qi) => {
+              if (state[qi]) return;
+              const card = listEl.querySelector(`.iq-card[data-qi="${qi}"]`);
+              if (q.type === 'multiple_choice' || q.type === 'matching') {
+                card.querySelectorAll('.iq-opt').forEach(b => {
+                  b.disabled = true;
+                  if (iqNorm((q.options || [])[+b.dataset.o]) === iqNorm(q.answer))
+                    b.classList.add('reveal-correct');
+                });
+              } else {
+                const inp = card.querySelector('.iq-fill');
+                if (inp) { inp.value = q.answer; inp.disabled = true; }
+                const ck = card.querySelector('.iq-check'); if (ck) ck.disabled = true;
+              }
+              const fb = card.querySelector('.iq-feedback');
+              fb.innerHTML = `<span class="ans">Đáp án: ${iqEsc(q.answer)}</span>` +
+                (q.explanation ? `<br><span class="ex">${iqEsc(q.explanation)}</span>` : '');
+              fb.classList.add('show');
+              state[qi] = 'revealed';
+            });
+            updateScore();
+          }
+        };
+      }
+
+      async function iqLoadData(c) {
+        if (c.ieltsUrl) return await fetch(c.ieltsUrl).then(r => r.json());
+        if (c._subDirHandle) {
+          const f = await (await c._subDirHandle.getFileHandle('ielts_listening.json')).getFile();
+          return JSON.parse(await f.text());
+        }
+        return null;
+      }
+
+      /* ── Câu hỏi nghe = tab riêng trong màn Luyện (không cướp phím tắt) ── */
+      let dmIqCtrl = null, dmTab = 'practice';
+
+      function dmSetTab(tab) {
+        dmTab = tab;
+        const content = document.querySelector('#dictModal .dm-content');
+        const onQ = tab === 'questions';
+        content.classList.toggle('qmode', onQ);
+        const btn = document.getElementById('dmTabQ');
+        btn.classList.toggle('tab-on', onQ);
+        btn.innerHTML = onQ ? '✍️ Quay lại luyện' : '🎧 Câu hỏi nghe';
+        if (onQ) dmPlayer.pause();      // dừng auto-play từng câu khi sang làm bài
+        else setTimeout(() => dmInput && dmInput.focus(), 30);
+      }
+
+      async function dmSetupIelts(c) {
+        const tabBtn = document.getElementById('dmTabQ');
+        dmSetTab('practice');           // luôn mở ở tab luyện trước
+        dmIqCtrl = null;
+        document.getElementById('dmQList').innerHTML = '';
+        if (!c || !c.hasIelts || !c._subDirHandle) { tabBtn.style.display = 'none'; return; }
+        try {
+          const data = await iqLoadData(c);
+          if (!data || !(data.questions || []).length) { tabBtn.style.display = 'none'; return; }
+          tabBtn.style.display = '';
+          const listEl  = document.getElementById('dmQList');
+          const scoreEl = document.getElementById('dmQScore');
+          const build = () => renderIelts({
+            listEl, scoreEl, player: dmPlayer, data,
+            // khi bấm "▶ nghe": bỏ cơ chế dừng-cuối-câu của dictation để nghe tự do
+            onSeek: () => { if (dmStopFn) { dmPlayer.removeEventListener('timeupdate', dmStopFn); dmStopFn = null; } },
+          });
+          dmIqCtrl = build();
+          document.getElementById('dmQRevealAll').onclick = () => dmIqCtrl && dmIqCtrl.revealAll();
+          document.getElementById('dmQReset').onclick = () => { dmIqCtrl = build(); };
+        } catch (e) { console.error('dmSetupIelts', e); tabBtn.style.display = 'none'; }
+      }
+      document.getElementById('dmTabQ').addEventListener('click', () =>
+        dmSetTab(dmTab === 'questions' ? 'practice' : 'questions'));
 
       // Detect Chinese / Japanese (không phải Korean — Korean dùng dấu cách bình thường)
       function dmIsCJK(text) { return /[぀-鿿㐀-䶿]/.test(text); }
@@ -3002,6 +3353,7 @@
 
       // Button wiring
       document.getElementById('dmClose').addEventListener('click', dmClose);
+      document.getElementById('dmHome').addEventListener('click', dmClose);
       document.getElementById('dmBtnNext').addEventListener('click', () => dmLoadSeg(dmCur + 1));
       document.getElementById('dmBtnPrev').addEventListener('click', () => dmLoadSeg(dmCur - 1));
       document.getElementById('dmBtnShowAll').addEventListener('click', () => {
@@ -3068,6 +3420,9 @@
       // Keyboard shortcuts (only active when dictation modal is open)
       document.addEventListener('keydown', e => {
         if (!dmModal.classList.contains('open')) return;
+        // Đang ở tab "Câu hỏi nghe" → KHÔNG dùng phím tắt dictation (Space, Tab,
+        // Ctrl, mũi tên…) để input/nút câu hỏi tự xử lý, tránh cướp action.
+        if (dmTab === 'questions') { if (e.key === 'Escape') dmClose(); return; }
         const inInput = document.activeElement === dmInput;
         if (e.key === 'Escape') { dmClose(); return; }
         if (e.key === 'Tab' && inInput) { e.preventDefault(); dmLoadSeg(dmCur + 1); return; }
