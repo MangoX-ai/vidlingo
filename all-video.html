@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MangoX Leanring Language</title>
+    <title>Vidlingo</title>
     <link
       rel="icon"
       type="image/svg+xml"
@@ -1192,7 +1192,30 @@
         font-family: 'Space Grotesk', -apple-system, sans-serif;
         -webkit-font-smoothing: antialiased;
       }
-      .dm-backdrop.open { display: flex; }
+      /* Trang detail: bố cục 2 cột — TRÁI (video + controls + transcript),
+         PHẢI (vùng luyện). Topbar & bottom chạy ngang full. */
+      .dm-backdrop.open {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto auto 1fr auto;
+        grid-template-areas:
+          "topbar  topbar"
+          "video   practice"
+          "ctrls   practice"
+          "tpanel  practice"
+          "tpanel  bottom";
+      }
+      .dm-topbar     { grid-area: topbar; }
+      .dm-video-area { grid-area: video; }
+      .dm-controls   { grid-area: ctrls; }
+      .dm-tpanel     { grid-area: tpanel; }
+      .dm-bottom     { grid-area: bottom; }
+      /* dm-content chỉ là wrapper logic (qmode) — bỏ box để main/qpanel rơi
+         thẳng vào grid ở cột phải. */
+      .dm-content    { display: contents; }
+      .dm-main, .dm-qpanel, .dm-spanel { grid-area: practice; }
+      /* Vạch ngăn 2 cột */
+      .dm-tpanel { border-right: 1px solid #f0e0e4; }
 
       /* Tab "Câu hỏi nghe" — thay chỗ vùng luyện khi bật, để không cướp phím tắt */
       .dm-qpanel {
@@ -1200,8 +1223,67 @@
         padding: 16px 20px 28px; flex-direction: column;
       }
       .dm-content.qmode .dm-main   { display: none; }
-      .dm-content.qmode .dm-tpanel { display: none; }
       .dm-content.qmode .dm-qpanel { display: flex; }
+
+      /* ── Tab "Sắp xếp câu" ── */
+      .dm-spanel {
+        display: none; min-height: 0; overflow-y: auto;
+        padding: 16px 20px 28px; flex-direction: column; gap: 14px;
+      }
+      .dm-content.smode .dm-main   { display: none; }
+      .dm-content.smode .dm-spanel { display: flex; }
+      /* Smode: thay nút gợi ý/điều hướng của dictation ở dm-bottom bằng
+         hành động của bài "Sắp xếp câu". */
+      .dm-bottom-sp, .dm-bottom-q { display: none; align-items: center; gap: 8px; }
+      .dm-backdrop.smode .dm-bottom > .dm-hint-btn { display: none; }
+      /* Smode: hành động (Nghe/Kiểm tra/…) bên TRÁI, nav Trước/Tiếp theo bên PHẢI */
+      .dm-backdrop.smode .dm-bottom-sp { display: flex; order: 1; }
+      .dm-backdrop.smode .dm-bottom > .dm-nav { order: 2; margin-left: auto; }
+      /* Qmode: ẩn nút gợi ý + nav của dictation, hiện hành động câu hỏi nghe */
+      .dm-backdrop.qmode .dm-bottom > .dm-hint-btn,
+      .dm-backdrop.qmode .dm-bottom > .dm-nav { display: none; }
+      .dm-backdrop.qmode .dm-bottom-q { display: flex; }
+      .dm-sp-head { display: flex; align-items: center; gap: 12px; max-width: 860px; }
+      .dm-sp-head h3 { font-size: 16px; font-weight: 800; color: #c41230; margin: 0; flex: 1; }
+      .dm-sp-status {
+        font-size: 12px; font-weight: 700; color: #fff; background: #c41230;
+        padding: 4px 12px; border-radius: 999px; white-space: nowrap;
+      }
+      .dm-sp-status.ok  { background: #16a34a; }
+      .dm-sp-status.bad { background: #dc2626; }
+      .dm-sp-hint { font-size: 12px; color: #9a6070; margin: 0; line-height: 1.5; max-width: 860px; }
+      .dm-sp-answer {
+        min-height: 56px; max-width: 860px;
+        display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start;
+        padding: 12px; border-radius: 12px;
+        border: 1.5px dashed #f0c4cc; background: #fff7f8;
+      }
+      .dm-sp-answer.ok  { border-color: #86efac; background: #f0fdf4; }
+      .dm-sp-answer.bad { border-color: #fca5a5; background: #fef2f2; }
+      .dm-sp-bank {
+        max-width: 860px;
+        display: flex; flex-wrap: wrap; gap: 8px;
+      }
+      .dm-sp-tok {
+        display: inline-flex; align-items: center; justify-content: center;
+        min-width: 36px; height: 34px; padding: 0 12px;
+        background: #fff0f2; border: 1px solid #f0d8dc;
+        border-radius: 6px; font-size: 14px; font-weight: 600;
+        color: #9a6070; cursor: pointer;
+        font-family: inherit; transition: all .15s; user-select: none;
+      }
+      .dm-sp-tok:hover { background: rgba(196,18,48,.1); border-color: #c41230; color: #c41230; }
+      .dm-sp-tok.in-answer { background: #fff0f2; border-color: #f0c4cc; }
+      .dm-sp-tok.tok-ok  { background: #dcfce7; border-color: #86efac; color: #166534; cursor: default; }
+      .dm-sp-tok.tok-bad { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+      .dm-sp-tok.placed-hidden { visibility: hidden; }
+      .dm-sp-tok.dragging { opacity: .4; }
+      /* Vạch đỏ chèn vào giữa khe 2 từ khi kéo-thả */
+      .dm-sp-caret {
+        width: 3px; align-self: stretch; min-height: 30px;
+        margin: 0 -2px; border-radius: 2px;
+        background: #c41230; pointer-events: none;
+      }
       .dm-qp-head { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; max-width: 860px; }
       .dm-qp-head h3 { font-size: 16px; font-weight: 800; color: #0e7490; margin: 0; flex: 1; }
       .dm-qp-score {
@@ -1265,7 +1347,7 @@
 
       /* ── Video area (top, full-width) ── */
       .dm-video-area {
-        width: 100%; height: 42vh; flex-shrink: 0;
+        width: 100%; aspect-ratio: 16 / 9; min-height: 0;
         background: #000; overflow: hidden; position: relative;
       }
       #dmVideoEl { width: 100%; height: 100%; object-fit: contain; display: block; }
@@ -1337,21 +1419,15 @@
       .dm-speed-btn:hover { border-color: #777; color: #bbb; }
       .dm-speed-btn.active { background: #c41230; border-color: #c41230; color: #fff; }
 
-      .dm-content {
-        flex: 1; min-height: 0;
-        display: flex; flex-direction: row;
-        overflow: hidden;
-      }
       .dm-main {
-        flex: 1; min-height: 0; min-width: 0;
+        min-height: 0; min-width: 0;
         display: flex; flex-direction: column;
         padding: 14px 20px 10px; gap: 11px; overflow-y: auto;
         color: #1a0508;
       }
       .dm-tpanel {
-        width: 250px; min-width: 180px;
-        overflow-y: auto; flex-shrink: 0;
-        border-left: 1px solid #f0e0e4;
+        min-height: 0; min-width: 0;
+        overflow-y: auto;
         background: #fdf8f9;
         padding: 6px 0;
       }
@@ -1493,7 +1569,9 @@
         font-family: inherit; color: #9a6070; cursor: pointer;
         display: flex; align-items: center; gap: 6px; transition: all .15s;
       }
-      .dm-hint-btn:hover { background: rgba(196,18,48,.1); color: #c41230; border-color: #c41230; }
+      .dm-hint-btn:hover,
+      .dm-hint-btn.on { background: rgba(196,18,48,.1); color: #c41230; border-color: #c41230; }
+      .dm-hint-btn.on kbd { border-color: #c41230; color: #c41230; }
       .dm-hint-btn kbd {
         display: inline-flex; align-items: center; justify-content: center;
         height: 17px; padding: 0 4px; background: #ffffff;
@@ -1515,7 +1593,20 @@
 
       @media (max-width: 600px) {
         .dm-shortcuts, .dm-sep { display: none; }
-        .dm-video-area { height: 30vh; }
+        /* Mobile: gập về 1 cột — video, controls, vùng luyện xếp dọc;
+           transcript vẫn là bottom-sheet cố định. */
+        .dm-backdrop.open {
+          grid-template-columns: 1fr;
+          grid-template-rows: auto auto auto 1fr auto;
+          grid-template-areas:
+            "topbar"
+            "video"
+            "ctrls"
+            "practice"
+            "bottom";
+        }
+        .dm-tpanel { border-right: none; }
+        .dm-video-area { aspect-ratio: auto; height: 30vh; }
         .dm-vol-wrap { display: none; }
         .dm-main { padding: 10px 12px 8px; gap: 9px; }
         .dm-input { font-size: 16px; padding: 12px 13px; }
@@ -1601,7 +1692,7 @@
               <polygon points="5 3 19 12 5 21 5 3" />
             </svg>
           </div>
-          <span class="logo-name">MangoX Leanring Language</span>
+          <span class="logo-name">Vidlingo</span>
         </a>
         <span class="logo-sep">/</span>
         <span class="logo-folder" id="folderName"></span>
@@ -1867,7 +1958,7 @@
           <button class="dm-speed-btn" data-rate="1.25">1.25x</button>
           <button class="dm-speed-btn" data-rate="1.5">1.5x</button>
         </div>
-        <div class="dm-vol-wrap">
+        <div class="dm-vol-wrap" style="display: none;">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
             <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
@@ -1904,6 +1995,7 @@
           <button class="dm-btn on" id="dmBtnAuto">→ Tự động</button>
           <button class="dm-btn on" id="dmBtnTPanel">Transcript</button>
           <button class="dm-btn" id="dmBtnTrans">Ẩn dịch</button>
+          <button class="dm-btn" id="dmTabS">🧩 Sắp xếp câu</button>
           <button class="dm-btn" id="dmTabQ" style="display:none">🎧 Câu hỏi nghe</button>
         </div>
       </div>
@@ -1955,10 +2047,19 @@
         </div>
         <p class="dm-qp-hint">Bấm “▶ nghe” ở mỗi câu để tới đúng đoạn trong video. Chọn / điền đáp án sẽ được chấm ngay.</p>
         <div id="dmQList"></div>
-        <div class="iq-actions">
-          <button class="iq-act-btn ghost" id="dmQRevealAll">Hiện hết đáp án</button>
-          <button class="iq-act-btn" id="dmQReset">Làm lại</button>
+      </div>
+
+      <!-- Tab "Sắp xếp câu" (xáo trộn từ → người dùng ghép lại theo transcript) -->
+      <div class="dm-spanel" id="dmSPanel">
+        <div class="dm-sp-head">
+          <h3>🧩 Sắp xếp câu</h3>
+          <span class="dm-sp-status" id="dmSStatus">Chọn từ theo đúng thứ tự</span>
         </div>
+        <p class="dm-sp-hint">Nghe đoạn, rồi bấm các từ bên dưới để xếp thành câu đúng. Bấm lại từ đã chọn để bỏ ra.</p>
+        <!-- Câu đang ghép -->
+        <div class="dm-sp-answer" id="dmSAnswer"></div>
+        <!-- Kho từ bị xáo trộn -->
+        <div class="dm-sp-bank" id="dmSBank"></div>
       </div>
 
       </div><!-- /.dm-content -->
@@ -1973,14 +2074,6 @@
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="7 13 12 18 17 13"/><polyline points="7 6 12 11 17 6"/></svg>
           Chữ cái cuối <kbd>Opt+J</kbd>
         </button>
-        <button class="dm-hint-btn" id="dmBtnBoth">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="6" x2="12" y2="18"/><polyline points="7 13 12 18 17 13"/></svg>
-          Đầu &amp; Cuối <kbd>Opt+K</kbd>
-        </button>
-        <button class="dm-hint-btn" id="dmBtnRO">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-          Xem từ <kbd>Opt+R</kbd>
-        </button>
         <div class="dm-nav">
           <button class="dm-nav-btn" id="dmBtnPrev">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
@@ -1989,6 +2082,32 @@
           <button class="dm-nav-btn primary" id="dmBtnNext">
             Tiếp theo
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+        <!-- Hành động cho tab "Sắp xếp câu" (chỉ hiện khi ở smode) -->
+        <div class="dm-bottom-sp" id="dmBottomSP">
+          <button class="dm-hint-btn" id="dmSCheck">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="20 6 9 17 4 12"/></svg>
+            Kiểm tra
+          </button>
+          <button class="dm-hint-btn" id="dmSReveal">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Đáp án
+          </button>
+          <button class="dm-hint-btn" id="dmSReset">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.36"/></svg>
+            Làm lại
+          </button>
+        </div>
+        <!-- Hành động cho tab "Câu hỏi nghe" (chỉ hiện khi ở qmode) -->
+        <div class="dm-bottom-q" id="dmBottomQ">
+          <button class="dm-nav-btn primary" id="dmQRevealAll">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Hiện hết đáp án
+          </button>
+          <button class="dm-hint-btn" id="dmQReset">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.36"/></svg>
+            Làm lại
           </button>
         </div>
       </div>
@@ -2048,6 +2167,8 @@
 
       // Ensure ?page and ?limit always present in URL on load
       (function initParams() {
+        // Trang detail (?slug) không mang page/limit.
+        if (new URLSearchParams(location.search).get('slug')) return;
         const url = new URL(location.href);
         let changed = false;
         if (!url.searchParams.has('page')) {
@@ -2226,7 +2347,9 @@
         refreshBtn.classList.remove('visible');
         folderName.style.display = 'none';
         hideBanner();
-        render();
+        // Hoãn 1 microtask: nhánh CLIPS nhúng chạy đồng bộ trước khi các const
+        // (dmModal, dmPlayer…) khởi tạo → tránh lỗi TDZ khi router mở detail.
+        queueMicrotask(applyRoute);
       }
 
       (async () => {
@@ -2258,7 +2381,7 @@
             openBtn.style.display = 'none';
             refreshBtn.classList.remove('visible');
             hideBanner();
-            render();
+            applyRoute();
             return;
           } catch (e) { console.warn('manifest.json không tải được', e); }
         }
@@ -2500,7 +2623,7 @@
           allClips.push(clip);
         }
 
-        render();
+        applyRoute();
       }
 
       // Tìm thư mục _parts/ phù hợp nhất cho một file mp4.
@@ -2701,7 +2824,7 @@
           .scrollTo({ top: 0, behavior: 'smooth' });
       }
 
-      window.addEventListener('popstate', render);
+      window.addEventListener('popstate', applyRoute);
 
       // Lazy preview: only the hovered card's iframe loads & plays.
       // Skip on touch devices — there `mouseenter` fires on tap and never
@@ -2744,6 +2867,7 @@
       let dmSegs = [], dmCur = 0, dmRevealed = new Set();
       let dmClipSlug = '', dmCompleted = new Set();
       let dmHintMode = 'none', dmAutoAdv = true, dmShowTrans = false;
+      let dmHFirst = false, dmHLast = false;   // toggle độc lập: chữ cái đầu / cuối
       let dmFontSize = 18, dmStopFn = null, dmSegEnd = Infinity;
 
       // ══ Media controller: bọc <video> native HOẶC YouTube IFrame player ══
@@ -2825,7 +2949,11 @@
               events: {
                 onStateChange: e => {
                   if (e.data === YT.PlayerState.PLAYING) { emit('play'); cover.classList.remove('paused'); }
-                  else if (e.data === YT.PlayerState.PAUSED) { emit('pause'); cover.classList.add('paused'); }
+                  // Dừng/stop giữa chừng → giữ lớp phủ TRONG SUỐT để lộ đúng khung
+                  // hình hiện tại (không che đen). Vẫn chặn hover nên YouTube không
+                  // bung title/share.
+                  else if (e.data === YT.PlayerState.PAUSED) { emit('pause'); cover.classList.remove('paused'); }
+                  // Hết video → che đen để giấu lưới "video liên quan".
                   else if (e.data === YT.PlayerState.ENDED) { emit('pause'); emit('ended'); cover.classList.add('paused'); }
                 },
               },
@@ -2963,8 +3091,46 @@
         });
       });
 
-      async function openDictation(i) {
+      // Click → đổi URL sang ?slug=… rồi để router mở trang detail.
+      function openDictation(i) {
         const c = filtered()[i];
+        if (!c || !c.hasTranscript) return;
+        navToDetail(c.slug);
+      }
+
+      // Đẩy ?slug vào history rồi áp router (mở detail).
+      function navToDetail(slug) {
+        const url = new URL(location.href);
+        url.searchParams.set('slug', slug);
+        url.searchParams.delete('page');
+        url.searchParams.delete('limit');
+        history.pushState(null, '', url);
+        applyRoute();
+      }
+
+      // Router: có ?slug → trang detail; không → trang list.
+      function applyRoute() {
+        const slug = new URLSearchParams(location.search).get('slug');
+        if (slug) {
+          const c = allClips.find((x) => x.slug === slug);
+          if (c && c.hasTranscript) {
+            // Mở trực tiếp bằng ?slug kèm page/limit → dọn URL cho gọn.
+            const u = new URL(location.href);
+            if (u.searchParams.has('page') || u.searchParams.has('limit')) {
+              u.searchParams.delete('page');
+              u.searchParams.delete('limit');
+              history.replaceState(null, '', u);
+            }
+            openDictationClip(c);
+            return;
+          }
+          // slug không hợp lệ → dọn về list
+        }
+        if (dmModal.classList.contains('open')) dmCloseView();
+        render();
+      }
+
+      async function openDictationClip(c) {
         if (!c || !c.hasTranscript) return;
         try {
           if (c.transcriptUrls) {
@@ -3050,7 +3216,18 @@
         } catch (e) { console.error('openDictation', e); }
       }
 
+      // Đóng detail = điều hướng về list (xoá ?slug). Router sẽ teardown.
       function dmClose() {
+        const url = new URL(location.href);
+        if (url.searchParams.has('slug')) {
+          url.searchParams.delete('slug');
+          history.pushState(null, '', url);
+        }
+        applyRoute();
+      }
+
+      // Teardown thực sự của trang detail (gọi bởi router).
+      function dmCloseView() {
         dmModal.classList.remove('open');
         document.getElementById('dmTPanel').classList.remove('tp-open');
         document.getElementById('dmTpBackdrop').classList.remove('open');
@@ -3105,10 +3282,9 @@
         const state = {};   // state[qi] = 'correct' | 'wrong' | 'revealed'
 
         function updateScore() {
-          if (!scoreEl) return;
           const correct = Object.values(state).filter(v => v === 'correct').length;
           const done = Object.keys(state).length;
-          scoreEl.textContent = `${correct} đúng / ${done} đã làm · ${qs.length} câu`;
+          if (scoreEl) scoreEl.textContent = `${correct} đúng / ${done} đã làm · ${qs.length} câu`;
         }
         function showFb(card, ok, q) {
           const fb = card.querySelector('.iq-feedback');
@@ -3260,13 +3436,198 @@
         dmTab = tab;
         const content = document.querySelector('#dictModal .dm-content');
         const onQ = tab === 'questions';
+        const onS = tab === 'scramble';
         content.classList.toggle('qmode', onQ);
-        const btn = document.getElementById('dmTabQ');
-        btn.classList.toggle('tab-on', onQ);
-        btn.innerHTML = onQ ? '✍️ Quay lại luyện' : '🎧 Câu hỏi nghe';
-        if (onQ) dmPlayer.pause();      // dừng auto-play từng câu khi sang làm bài
-        else setTimeout(() => dmInput && dmInput.focus(), 30);
+        content.classList.toggle('smode', onS);
+        // dm-bottom nằm ngoài dm-content → toggle trên backdrop để đổi theo
+        dmModal.classList.toggle('smode', onS);
+        dmModal.classList.toggle('qmode', onQ);
+        const btnQ = document.getElementById('dmTabQ');
+        btnQ.classList.toggle('tab-on', onQ);
+        btnQ.innerHTML = onQ ? '✍️ Quay lại luyện' : '🎧 Câu hỏi nghe';
+        const btnS = document.getElementById('dmTabS');
+        btnS.classList.toggle('tab-on', onS);
+        btnS.innerHTML = onS ? '✍️ Quay lại luyện' : '🧩 Sắp xếp câu';
+        if (onQ || onS) dmPlayer.pause();   // dừng auto-play từng câu khi sang làm bài
+        if (onS) dmBuildScramble(dmCur);
+        if (tab === 'practice') setTimeout(() => dmInput && dmInput.focus(), 30);
       }
+      document.getElementById('dmTabS').addEventListener('click', () =>
+        dmSetTab(dmTab === 'scramble' ? 'practice' : 'scramble'));
+
+      // ══ Bài tập "Sắp xếp câu" (xáo trộn từ → ghép lại theo transcript) ══
+      let dmSTokens = [];   // [{text, norm}] theo thứ tự đúng
+      let dmSOrder  = [];   // chỉ số đã xáo trộn để hiển thị kho từ
+      let dmSPlaced = [];   // chỉ số các từ đã đặt vào câu (theo thứ tự đặt)
+      let dmSDrag   = null; // { ti } — token đang kéo
+
+      function dmShuffle(arr) {
+        const a = arr.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
+      function dmBuildScramble(idx) {
+        const seg = dmSegs[idx];
+        if (!seg) return;
+        const toks = dmTokenize(seg.text);
+        dmSTokens = toks.map(t => ({ text: t, norm: dmNorm(t) }));
+        dmSPlaced = [];
+        let order = dmShuffle(dmSTokens.map((_, i) => i));
+        // Tránh xáo trộn ra y hệt thứ tự gốc (khi có >1 từ)
+        if (dmSTokens.length > 1 && order.every((v, i) => v === i)) order = dmShuffle(order);
+        dmSOrder = order;
+        dmRenderScramble();
+        dmSStatusSet('');
+      }
+
+      function dmSStatusSet(state) {
+        const el = document.getElementById('dmSStatus');
+        const ans = document.getElementById('dmSAnswer');
+        el.classList.remove('ok', 'bad'); ans.classList.remove('ok', 'bad');
+        if (state === 'ok')  { el.classList.add('ok');  ans.classList.add('ok');  el.textContent = '✓ Chính xác!'; }
+        else if (state === 'bad') { el.classList.add('bad'); ans.classList.add('bad'); el.textContent = '✗ Chưa đúng, thử lại'; }
+        else el.textContent = `${dmSPlaced.length}/${dmSTokens.length} từ`;
+      }
+
+      function dmMakeDraggable(el, ti) {
+        el.draggable = true;
+        el.addEventListener('dragstart', e => {
+          dmSDrag = { ti };
+          e.dataTransfer.effectAllowed = 'move';
+          try { e.dataTransfer.setData('text/plain', String(ti)); } catch (_) {}
+          requestAnimationFrame(() => el.classList.add('dragging'));
+        });
+        el.addEventListener('dragend', () => { dmSDrag = null; dmSClearIndicator(); el.classList.remove('dragging'); });
+      }
+
+      function dmRenderScramble() {
+        const bank = document.getElementById('dmSBank');
+        const ans  = document.getElementById('dmSAnswer');
+        // Câu đang ghép
+        ans.innerHTML = '';
+        dmSPlaced.forEach((ti, pos) => {
+          const c = document.createElement('button');
+          c.className = 'dm-sp-tok in-answer';
+          c.textContent = dmSTokens[ti].text;
+          c.addEventListener('click', () => dmScrambleRemove(pos));
+          dmMakeDraggable(c, ti);
+          ans.appendChild(c);
+        });
+        // Kho từ (giữ chỗ ẩn cho từ đã đặt để layout không nhảy)
+        bank.innerHTML = '';
+        dmSOrder.forEach(ti => {
+          const placed = dmSPlaced.includes(ti);
+          const c = document.createElement('button');
+          c.className = 'dm-sp-tok' + (placed ? ' placed-hidden' : '');
+          c.textContent = dmSTokens[ti].text;
+          if (!placed) { c.addEventListener('click', () => dmScramblePlace(ti)); dmMakeDraggable(c, ti); }
+          bank.appendChild(c);
+        });
+      }
+
+      // ── Vị trí chèn khi kéo-thả vào câu ──
+      function dmSInsertIndex(container, x, y) {
+        const chips = [...container.querySelectorAll('.dm-sp-tok:not(.dragging)')];
+        for (let i = 0; i < chips.length; i++) {
+          const r = chips[i].getBoundingClientRect();
+          if (y < r.bottom && x < r.left + r.width / 2) return i;
+        }
+        return chips.length;
+      }
+      let dmSCaret = null;   // vạch đỏ chỉ vị trí chèn
+      function dmSGetCaret() {
+        if (!dmSCaret) { dmSCaret = document.createElement('div'); dmSCaret.className = 'dm-sp-caret'; }
+        return dmSCaret;
+      }
+      function dmSClearIndicator() {
+        if (dmSCaret && dmSCaret.parentNode) dmSCaret.parentNode.removeChild(dmSCaret);
+      }
+      function dmSShowIndicator(container, x, y) {
+        const chips = [...container.querySelectorAll('.dm-sp-tok:not(.dragging)')];
+        const idx = dmSInsertIndex(container, x, y);
+        const caret = dmSGetCaret();
+        if (idx >= chips.length) container.appendChild(caret);
+        else container.insertBefore(caret, chips[idx]);
+      }
+
+      (function dmScrambleDnD() {
+        const ans  = document.getElementById('dmSAnswer');
+        const bank = document.getElementById('dmSBank');
+        if (!ans || !bank) return;
+        ans.addEventListener('dragover', e => {
+          if (!dmSDrag) return;
+          e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+          dmSShowIndicator(ans, e.clientX, e.clientY);
+        });
+        ans.addEventListener('dragleave', e => { if (!ans.contains(e.relatedTarget)) dmSClearIndicator(); });
+        ans.addEventListener('drop', e => {
+          if (!dmSDrag) return;
+          e.preventDefault();
+          const ti = dmSDrag.ti;
+          const ins = dmSInsertIndex(ans, e.clientX, e.clientY);
+          const arr = dmSPlaced.slice();
+          const cur = arr.indexOf(ti);
+          let target = ins;
+          if (cur !== -1) { arr.splice(cur, 1); if (cur < ins) target -= 1; }
+          target = Math.max(0, Math.min(target, arr.length));
+          arr.splice(target, 0, ti);
+          dmSPlaced = arr;
+          dmSDrag = null; dmSClearIndicator();
+          dmRenderScramble();
+          if (dmSPlaced.length === dmSTokens.length) dmCheckScramble(); else dmSStatusSet('');
+        });
+        // Thả về kho = bỏ từ khỏi câu
+        bank.addEventListener('dragover', e => { if (dmSDrag) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; } });
+        bank.addEventListener('drop', e => {
+          if (!dmSDrag) return;
+          e.preventDefault();
+          const ti = dmSDrag.ti;
+          const cur = dmSPlaced.indexOf(ti);
+          dmSDrag = null; dmSClearIndicator();
+          if (cur !== -1) { dmSPlaced.splice(cur, 1); dmRenderScramble(); dmSStatusSet(''); }
+        });
+      })();
+
+      function dmScramblePlace(ti) {
+        dmSPlaced.push(ti);
+        dmRenderScramble();
+        if (dmSPlaced.length === dmSTokens.length) dmCheckScramble();
+        else dmSStatusSet('');
+      }
+
+      function dmScrambleRemove(pos) {
+        dmSPlaced.splice(pos, 1);
+        dmRenderScramble();
+        dmSStatusSet('');
+      }
+
+      function dmCheckScramble() {
+        if (!dmSPlaced.length) return;
+        const ans = document.getElementById('dmSAnswer');
+        ans.querySelectorAll('.dm-sp-tok').forEach((c, pos) => {
+          const ti = dmSPlaced[pos];
+          c.classList.remove('in-answer');
+          c.classList.add(dmSTokens[ti].norm === dmSTokens[pos].norm ? 'tok-ok' : 'tok-bad');
+        });
+        const ok = dmSPlaced.length === dmSTokens.length &&
+                   dmSPlaced.every((ti, pos) => dmSTokens[ti].norm === dmSTokens[pos].norm);
+        dmSStatusSet(ok ? 'ok' : 'bad');
+        if (ok) dmMarkDone(dmCur);
+      }
+
+      function dmRevealScramble() {
+        dmSPlaced = dmSTokens.map((_, i) => i);
+        dmRenderScramble();
+        dmCheckScramble();
+      }
+
+      document.getElementById('dmSCheck').addEventListener('click', dmCheckScramble);
+      document.getElementById('dmSReveal').addEventListener('click', dmRevealScramble);
+      document.getElementById('dmSReset').addEventListener('click', () => dmBuildScramble(dmCur));
 
       async function dmSetupIelts(c) {
         const tabBtn = document.getElementById('dmTabQ');
@@ -3373,9 +3734,8 @@
         dmCur = idx; dmRevealed.clear(); dmInput.value = '';
         document.getElementById('dmBtnShowAll').textContent = dmHintMode === 'all' ? 'Ẩn tất cả' : 'Hiện tất cả';
         if (dmHintMode !== 'all') {
-          document.getElementById('dmBtnFL').classList.toggle('on', dmHintMode === 'first');
-          document.getElementById('dmBtnLL').classList.toggle('on', dmHintMode === 'last');
-          document.getElementById('dmBtnBoth').classList.toggle('on', dmHintMode === 'both');
+          document.getElementById('dmBtnFL').classList.toggle('on', dmHFirst);
+          document.getElementById('dmBtnLL').classList.toggle('on', dmHLast);
         }
         dmIdx.textContent = `#${idx + 1}`;
         document.getElementById('dmBtnPrev').disabled = idx === 0;
@@ -3392,6 +3752,7 @@
         }
         dmUpdateProgress('');
         dmSyncTPanel(idx);
+        if (dmTab === 'scramble') dmBuildScramble(idx);
       }
 
       function dmAttachStop() {
@@ -3423,6 +3784,7 @@
 
       function dmReplay() { if (dmSegs[dmCur]) dmPlaySeg(dmSegs[dmCur]); }
 
+      // Đổi miệng mascot: cười (cong) khi đúng cả câu, thẳng khi chưa.
       function dmUpdateProgress(val) {
         const segText = dmSegs[dmCur]?.text || '';
         const words = dmTokenize(segText);
@@ -3523,6 +3885,9 @@
       }
       function dmHideAll() {
         dmHintMode = 'none';
+        dmHFirst = false; dmHLast = false;
+        document.getElementById('dmBtnFL').classList.remove('on');
+        document.getElementById('dmBtnLL').classList.remove('on');
         dmRevealed.clear();
         dmGrid.querySelectorAll('.dm-chip').forEach(chip => {
           chip.dataset.r = '0';
@@ -3532,60 +3897,17 @@
         document.getElementById('dmBtnShowAll').textContent = 'Hiện tất cả';
         dmUpdateProgress(dmInput.value);
       }
-      function dmHintClear() {
-        dmHintMode = 'none';
-        dmGrid.querySelectorAll('.dm-chip[data-r="0"]:not(.dm-correct):not(.dm-typed-wrong)').forEach(c => {
-          c.classList.remove('dm-hint-first', 'dm-hint-last', 'dm-hint-both');
-          c.textContent = '·'.repeat(Math.max(c.dataset.word.length, 1));
-        });
-        document.getElementById('dmBtnFL').classList.remove('on');
-        document.getElementById('dmBtnLL').classList.remove('on');
-        document.getElementById('dmBtnBoth').classList.remove('on');
+      // Áp hint theo 2 cờ độc lập: đầu (dmHFirst) và cuối (dmHLast).
+      // Bật cả 2 → tự ra "đầu & cuối". Tổng hợp về dmHintMode rồi vẽ lại lưới.
+      function dmSyncHints() {
+        if (dmHintMode === 'all') return;   // đang "Hiện tất cả" → bỏ qua toggle
+        dmHintMode = dmHFirst && dmHLast ? 'both' : dmHFirst ? 'first' : dmHLast ? 'last' : 'none';
+        document.getElementById('dmBtnFL').classList.toggle('on', dmHFirst);
+        document.getElementById('dmBtnLL').classList.toggle('on', dmHLast);
+        dmUpdateProgress(dmInput.value);    // vẽ lại chip theo dmHintMode
       }
-      function dmHintFirst() {
-        if (dmHintMode === 'all') return;
-        if (dmHintMode === 'first') { dmHintClear(); return; }
-        dmHintMode = 'first';
-        document.getElementById('dmBtnFL').classList.add('on');
-        document.getElementById('dmBtnLL').classList.remove('on');
-        document.getElementById('dmBtnBoth').classList.remove('on');
-        dmGrid.querySelectorAll('.dm-chip[data-r="0"]:not(.dm-correct):not(.dm-typed-wrong)').forEach(c => {
-          const w = c.dataset.word; if (!w) return;
-          c.classList.remove('dm-hint-last', 'dm-hint-both');
-          c.textContent = w[0] + '·'.repeat(Math.max(w.length - 1, 0));
-          c.classList.add('dm-hint-first');
-        });
-      }
-      function dmHintLast() {
-        if (dmHintMode === 'all') return;
-        if (dmHintMode === 'last') { dmHintClear(); return; }
-        dmHintMode = 'last';
-        document.getElementById('dmBtnFL').classList.remove('on');
-        document.getElementById('dmBtnLL').classList.add('on');
-        document.getElementById('dmBtnBoth').classList.remove('on');
-        dmGrid.querySelectorAll('.dm-chip[data-r="0"]:not(.dm-correct):not(.dm-typed-wrong)').forEach(c => {
-          const w = c.dataset.word; if (!w) return;
-          c.classList.remove('dm-hint-first', 'dm-hint-both');
-          c.textContent = '·'.repeat(Math.max(w.length - 1, 0)) + w[w.length - 1];
-          c.classList.add('dm-hint-last');
-        });
-      }
-      function dmHintBoth() {
-        if (dmHintMode === 'all') return;
-        if (dmHintMode === 'both') { dmHintClear(); return; }
-        dmHintMode = 'both';
-        document.getElementById('dmBtnFL').classList.remove('on');
-        document.getElementById('dmBtnLL').classList.remove('on');
-        document.getElementById('dmBtnBoth').classList.add('on');
-        dmGrid.querySelectorAll('.dm-chip[data-r="0"]:not(.dm-correct):not(.dm-typed-wrong)').forEach(c => {
-          const w = c.dataset.word; if (!w) return;
-          c.classList.remove('dm-hint-first', 'dm-hint-last');
-          const mid = w.length <= 2 ? '' : '·'.repeat(w.length - 2);
-          c.textContent = w.length === 1 ? w : w[0] + mid + w[w.length - 1];
-          c.classList.add('dm-hint-both');
-        });
-      }
-      function dmRevealOne() { const n = dmGrid.querySelector('.dm-chip[data-r="0"]'); if (n) dmRevealChip(n); }
+      function dmHintFirst() { if (dmHintMode === 'all') return; dmHFirst = !dmHFirst; dmSyncHints(); }
+      function dmHintLast()  { if (dmHintMode === 'all') return; dmHLast  = !dmHLast;  dmSyncHints(); }
 
       // Button wiring
       document.getElementById('dmHome').addEventListener('click', dmClose);
@@ -3596,8 +3918,6 @@
       });
       document.getElementById('dmBtnFL').addEventListener('click', dmHintFirst);
       document.getElementById('dmBtnLL').addEventListener('click', dmHintLast);
-      document.getElementById('dmBtnBoth').addEventListener('click', dmHintBoth);
-      document.getElementById('dmBtnRO').addEventListener('click', dmRevealOne);
       document.getElementById('dmBtnFd').addEventListener('click', () => { dmFontSize = Math.max(12, dmFontSize - 2); dmInput.style.fontSize = dmFontSize + 'px'; });
       document.getElementById('dmBtnFi').addEventListener('click', () => { dmFontSize = Math.min(30, dmFontSize + 2); dmInput.style.fontSize = dmFontSize + 'px'; });
       document.getElementById('dmBtnAuto').addEventListener('click', function() {
@@ -3658,6 +3978,12 @@
         // Đang ở tab "Câu hỏi nghe" → KHÔNG dùng phím tắt dictation (Space, Tab,
         // Ctrl, mũi tên…) để input/nút câu hỏi tự xử lý, tránh cướp action.
         if (dmTab === 'questions') { if (e.key === 'Escape') dmClose(); return; }
+        // Tab "Sắp xếp câu": chỉ giữ Esc (đóng) và Ctrl (nghe lại); còn lại để yên.
+        if (dmTab === 'scramble') {
+          if (e.key === 'Escape') { dmClose(); return; }
+          if (e.key === 'Control') { e.preventDefault(); dmReplay(); return; }
+          return;
+        }
         const inInput = document.activeElement === dmInput;
         if (e.key === 'Escape') { dmClose(); return; }
         if (e.key === 'Tab' && inInput) { e.preventDefault(); dmLoadSeg(dmCur + 1); return; }
@@ -3665,8 +3991,6 @@
         if (e.ctrlKey && !e.shiftKey && !e.altKey) { e.preventDefault(); dmReplay(); return; }
         if (e.altKey && e.key.toLowerCase() === 'h') { e.preventDefault(); dmHintFirst(); return; }
         if (e.altKey && e.key.toLowerCase() === 'j') { e.preventDefault(); dmHintLast(); return; }
-        if (e.altKey && e.key.toLowerCase() === 'k') { e.preventDefault(); dmHintBoth(); return; }
-        if (e.altKey && e.key.toLowerCase() === 'r') { e.preventDefault(); dmRevealOne(); return; }
         if (!inInput && e.key === 'ArrowRight') dmLoadSeg(dmCur + 1);
         if (!inInput && e.key === 'ArrowLeft') dmLoadSeg(dmCur - 1);
       });
